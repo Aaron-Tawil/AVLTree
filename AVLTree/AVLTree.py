@@ -1,9 +1,9 @@
 #id1:
 #name1:
 #username1:
-#id2:
-#name2:
-#username2:
+#id2:345778039
+#name2:Aaron Tawil
+#username2:aarondavidt
 
 
 """A class represnting a node in an AVL tree"""
@@ -16,13 +16,13 @@ class AVLNode(object):
 	@type value: string
 	@param value: data of your node
 	"""
-	def __init__(self, key, value):
+	def __init__(self, key, value, left=None, right=None, parent=None):
 		self.key = key
 		self.value = value
-		self.left = None
-		self.right = None
-		self.parent = None
-		self.height = -1
+		self.left = left
+		self.right = right
+		self.parent = parent
+		self.height = 0 if key is not None else -1
 		
 
 	"""returns whether self is not a virtual node 
@@ -31,7 +31,11 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 	def is_real_node(self):
-		return False
+		return self.key is not None
+
+
+# Define the external leaf
+EXTERNAL_LEAF = AVLNode(key=None, value=None)
 
 
 """
@@ -45,6 +49,8 @@ class AVLTree(object):
 	"""
 	def __init__(self):
 		self.root = None
+		self.size = 0
+		self.max = self.root
 
 
 	"""searches for a node in the dictionary corresponding to the key (starting at the root)
@@ -56,7 +62,17 @@ class AVLTree(object):
 	and e is the number of edges on the path between the starting node and ending node+1.
 	"""
 	def search(self, key):
-		return None, -1
+		curr = self.root
+		edges = 1
+		while curr.is_real_node():
+			if curr.key == key:
+				return curr, edges
+			elif curr.key < key:
+				curr = curr.right
+			else:
+				curr = curr.left
+			edges += 1
+		return None, edges-1
 
 
 	"""searches for a node in the dictionary corresponding to the key, starting at the max
@@ -65,10 +81,26 @@ class AVLTree(object):
 	@param key: a key to be searched
 	@rtype: (AVLNode,int)
 	@returns: a tuple (x,e) where x is the node corresponding to key (or None if not found),
-	and e is the number of edges on the path between the starting node and ending node+1.
+	and e is the number of edges on the path between the starting node- the maximum of tree and ending node+1.
 	"""
 	def finger_search(self, key):
-		return None, -1
+		curr = self.max_node()
+		edges = 1
+		# go up until key is in subtree of current node
+		while curr.is_real_node() and curr.parent and (curr.parent.key >= key):
+			curr = curr.parent
+			edges += 1
+		# go down until key is found
+		while curr.is_real_node():
+			if curr.key == key:
+				return curr, edges
+			elif curr.key < key:
+				curr = curr.right
+			else:
+				curr = curr.left
+			edges += 1
+
+		return None, edges-1
 
 
 	"""inserts a new node into the dictionary with corresponding key and value (starting at the root)
@@ -156,7 +188,7 @@ class AVLTree(object):
 	@returns: the maximal node, None if the dictionary is empty
 	"""
 	def max_node(self):
-		return None
+		return self.max
 
 	"""returns the number of items in dictionary 
 
