@@ -34,7 +34,7 @@ class AVLNode(object):
 		return self.key is not None
 
 
-# Define the external leaf
+# Define the external leaf as singleton object (all external will point to this)
 EXTERNAL_LEAF = AVLNode(key=None, value=None)
 
 
@@ -49,8 +49,8 @@ class AVLTree(object):
 	"""
 	def __init__(self):
 		self.root = None
-		self.size = 0
-		self.max = self.root
+		self.size = 0  # Number of real nodes in the tree
+		self.max = self.root # pointer to maximum node
 
 
 	"""searches for a node in the dictionary corresponding to the key (starting at the root)
