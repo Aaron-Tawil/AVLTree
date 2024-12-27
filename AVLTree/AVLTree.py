@@ -118,6 +118,8 @@ class AVLTree(object):
 		return None, -1, -1
 
 
+
+
 	"""inserts a new node into the dictionary with corresponding key and value, starting at the max
 
 	@type key: int
@@ -241,3 +243,22 @@ class AVLTree(object):
 	"""
 	def get_root(self):
 		return self.root
+
+
+	def insert_position(self, key):#להחזיר מספר קשתות וצומת האבא
+		curr = self.root
+		curr_parent = None
+		edges = 1
+		while curr.is_real_node():
+			if curr.key == key:
+				return curr_parent, edges
+			elif curr.key < key:
+				curr_parent = curr
+				curr = curr.right
+			else:
+				curr_parent = curr
+				curr = curr.left
+			edges += 1
+		return None, edges - 1
+
+
