@@ -84,6 +84,7 @@ class AVLTree(object):
 		return node, edges
 
 
+
 	"""inserts a new node into the dictionary with corresponding key and value (starting at the root)
 
 	@type key: int
