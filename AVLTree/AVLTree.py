@@ -52,7 +52,6 @@ class AVLTree(object):
 		self.size = 0  # Number of real nodes in the tree
 		self.max = self.root # pointer to maximum node
 
-
 	"""searches for a node in the dictionary corresponding to the key (starting at the root)
         
 	@type key: int
@@ -157,8 +156,7 @@ class AVLTree(object):
 	"""
 	def join(self, tree2, key, val):
 		return
-
-
+	#  בפונקציה ספליטה השתמשתי בפונקציה הזו גם עבור מקרה זבו אחד מהעצים הוא ריק, אז או לטפל בזה כאן או לטפל בזה במתודה split
 	"""splits the dictionary at a given node
 
 	@type node: AVLNode
@@ -169,8 +167,39 @@ class AVLTree(object):
 	dictionary smaller than node.key, and right is an AVLTree representing the keys in the 
 	dictionary larger than node.key.
 	"""
+
+	# TODO: Update this function to calculate size,root,max dynamically for each tree
 	def split(self, node):
-		return None, None
+		# Initialize the subtrees based on the given node
+		larger_than_node = node.right # Subtree with nodes larger than the current node's key
+		smaller_than_node = node.left # Subtree with nodes smaller than the current node's key
+
+		# Disconnect the given node from its left and right children
+		node.left = None
+		node.right = None
+
+		# Traverse upwards from the given node to update the tree structure
+		currNode = node
+		while currNode.parent is not None:
+			parent = currNode.parent
+
+			if currNode.key > parent.key:# If the current node is in the right subtree of its parent
+				tempTree = parent.left
+				parent.left = None
+				# Join the parent's left subtree with the smaller subtree
+				smaller_than_node = tempTree.join(smaller_than_node, parent.key, parent.val)
+			else: # If the current node is in the left subtree of its parent
+				tempTree = parent.right
+				parent.right = None
+				# Join the parent's right subtree with the larger subtree
+				larger_than_node = larger_than_node.join(tempTree, currNode.key, currNode.val)
+
+			# Move up to the parent node for the next iteration
+			currNode = parent
+
+		# Return the two resulting subtrees
+		return larger_than_node, smaller_than_node
+
 
 
 	"""returns an s array representing dictionary 
@@ -179,8 +208,14 @@ class AVLTree(object):
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
 	"""
 	def avl_to_array(self):
-		return None
+		curr_node = self.root
+		if not curr_node.left and not curr_node.right:
+			return [(curr_node.key, curr_node.value)]
 
+		left_subtree = curr_node.left.avl_to_array() if curr_node.left else []
+		right_subtree = curr_node.right.avl_to_array() if curr_node.right else []
+
+		return left_subtree + [(curr_node.key, curr_node.value)] + right_subtree
 
 	"""returns the node with the maximal key in the dictionary
 
@@ -196,7 +231,8 @@ class AVLTree(object):
 	@returns: the number of items in dictionary 
 	"""
 	def size(self):
-		return -1	
+		# This function retrieves the root node of the tree and returns its 'size' attribute.
+		return self.get_root().size
 
 
 	"""returns the root of the tree representing the dictionary
@@ -205,4 +241,10 @@ class AVLTree(object):
 	@returns: the root, None if the dictionary is empty
 	"""
 	def get_root(self):
-		return None
+		# Start with the current node and traverse upwards to find the root
+		curr_node = self
+		while curr_node.parent is not None:
+			curr_node = curr_node.parent # Move to the parent node
+
+		# Return the root node
+		return curr_node
