@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82d91d4e-5bec-43c3-910e-45d9c33290e6" name="Changes" comment=" &quot;Correction of the last four according to the self&quot;">
-      <change beforePath="$PROJECT_DIR$/AVLTree/AVLTree.py" beforeDir="false" afterPath="$PROJECT_DIR$/AVLTree/AVLTree.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AVLTree/text.text" beforeDir="false" afterPath="$PROJECT_DIR$/AVLTree/text.text" afterDir="false" />
+    <list default="true" id="82d91d4e-5bec-43c3-910e-45d9c33290e6" name="Changes" comment="&quot;insert_position&quot;">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,6 +20,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectColorInfo">{
@@ -31,23 +35,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Python tests in Tester.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.ex2-q2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.hello.executor&quot;: &quot;Run&quot;,
-    &quot;Python.testtt.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Python tests in Tester.py.executor": "Run",
+    "Python.ex2-q2.executor": "Run",
+    "Python.hello.executor": "Run",
+    "Python.testtt.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "Haim",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Python tests.Python tests in Tester.py">
     <configuration name="testtt" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="AVLTree" />
@@ -92,6 +96,9 @@
       <list>
         <item itemvalue="Python tests.Python tests in Tester.py" />
         <item itemvalue="Python.testtt" />
+        <item itemvalue="Python tests.Python tests in Tester.py" />
+        <item itemvalue="Python.testtt" />
+        <item itemvalue="Python tests.Python tests in Tester.py" />
       </list>
     </recent_temporary>
   </component>
@@ -119,7 +126,7 @@
       <workItem from="1734431854199" duration="530000" />
       <workItem from="1734795522320" duration="332000" />
       <workItem from="1734795868483" duration="1225000" />
-      <workItem from="1735243827997" duration="18764000" />
+      <workItem from="1735243827997" duration="19936000" />
     </task>
     <task id="LOCAL-00001" summary="&quot;test&quot;">
       <option name="closed" value="true" />
@@ -145,7 +152,23 @@
       <option name="project" value="LOCAL" />
       <updated>1735299529776</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="&quot;insert_position&quot;">
+      <option name="closed" value="true" />
+      <created>1735302621129</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1735302621129</updated>
+    </task>
+    <task id="LOCAL-00005" summary="&quot;insert_position&quot;">
+      <option name="closed" value="true" />
+      <created>1735302658947</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1735302658947</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -155,7 +178,8 @@
     <MESSAGE value="&quot;test&quot;" />
     <MESSAGE value="&quot;The last four&quot;" />
     <MESSAGE value=" &quot;Correction of the last four according to the self&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value=" &quot;Correction of the last four according to the self&quot;" />
+    <MESSAGE value="&quot;insert_position&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="&quot;insert_position&quot;" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/AVLTree$.coverage" NAME=" Coverage Results" MODIFIED="1734796329655" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/AVLTree" />
