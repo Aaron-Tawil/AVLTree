@@ -115,7 +115,43 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def insert(self, key, val):
-		return None, -1, -1
+		parent, edges = self.insert_position(key)
+		if parent is None:
+			self.root = AVLNode(key, val, parent=None, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
+			self.size += 1
+			self.max = self.root
+			return self.root, edges, 0
+		new_node = AVLNode(key, val, parent=parent, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
+		if key > parent.key:
+			parent.right = new_node
+		else:
+			parent.left = new_node
+		self.size += 1
+
+		# case A: parent is not a leaf - valid AVL tree
+		if parent.height == 1:
+			return new_node, edges, 0
+		# case B: parent is a leaf
+		promotes = 0
+		promote_height(parent)
+		promotes += 1
+
+		# rebalancing logic
+		curr = parent
+		bf = balance_factor(curr)
+		while (bf==1 or bf==-1)  and curr.parent: # if bf==0 we are done
+			# case 1 - promote
+			promote_height(curr)
+			promotes += 1
+			curr = curr.parent
+			bf = balance_factor(curr)
+
+
+		# case 2 - rotate if needed once
+		if bf >1 or bf<-1:
+				rebalance(curr)
+		return new_node, edges, promotes
+
 
 
 
