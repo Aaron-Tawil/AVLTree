@@ -42,10 +42,6 @@ EXTERNAL_LEAF = AVLNode(key=None, value=None)
 A class implementing an AVL tree.
 """
 
-
-
-
-
 class AVLTree(object):
 
 	"""
@@ -155,6 +151,7 @@ class AVLTree(object):
 		if bf >1 or bf<-1:
 				rebalance(curr)
 		return new_node, edges, promotes
+
 
 
 
@@ -300,21 +297,5 @@ class AVLTree(object):
 			edges += 1
 		return None, edges - 1
 
+	def smm
 
-
-
-# stand-alone helper functions
-def balance_factor(node):
-	if not node or not node.is_real_node():
-		return 0
-	return node.left.height - node.right.height
-
-def promote_height(node):
-	if not node or not node.is_real_node():
-		return
-	node.height = 1 + max(node.left.height, node.right.height)
-
-def rebalance(curr):
-
-
-	pass
