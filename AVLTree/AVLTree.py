@@ -132,9 +132,6 @@ class AVLTree(object):
 			parent.left = new_node
 		self.size += 1
 
-
-
-
 		# case A: parent is not a leaf - valid AVL tree
 		if parent.height == 1:
 			return new_node, edges, 0
