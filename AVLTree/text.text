@@ -1,6 +1,4 @@
-Hi
 
-שלום
 
 
 rotate_right(self, node)
@@ -11,7 +9,19 @@ return promotes : rebalance(node) // Checks and fixes the imbalance at each step
 
 predecessor(self, node) // return the predecessor of the node
 
-update_height(node)// update the height of the node
+update_height(node)// update the height of the node based on the children
 
 insert_position(self, key) \\ return the parent node of the new node (the parent is a leaf)
 
+
+
+### **Key Logic for Balancing the Tree:**
+1. Calculate the **balance factor** for the parent node.
+2. Identify the **imbalance case**:
+   - **LL (Left-Left)** → Perform **Right Rotation**.
+   - **RR (Right-Right)** → Perform **Left Rotation**.
+   - **LR (Left-Right)** → Perform **Left Rotation** followed by **Right Rotation**.
+   - **RL (Right-Left)** → Perform **Right Rotation** followed by **Left Rotation**.
+3. **Apply rotations** to restore balance.
+
+Would you like to see the full implementation of an AVL Tree in Python?
