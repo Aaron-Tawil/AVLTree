@@ -61,18 +61,7 @@ class AVLTree(object):
 	and e is the number of edges on the path between the starting node and ending node+1.
 	"""
 	def search(self, key):
-		curr = self.root
-		edges = 1
-		while curr.is_real_node():
-			if curr.key == key:
-				return curr, edges
-			elif curr.key < key:
-				curr = curr.right
-			else:
-				curr = curr.left
-			edges += 1
-		return None, edges-1
-
+		return search_from(self.root, key)
 
 	"""searches for a node in the dictionary corresponding to the key, starting at the max
         
@@ -84,22 +73,16 @@ class AVLTree(object):
 	"""
 	def finger_search(self, key):
 		curr = self.max_node()
-		edges = 1
+		edges = 0
 		# go up until key is in subtree of current node
 		while curr.is_real_node() and curr.parent and (curr.parent.key >= key):
 			curr = curr.parent
 			edges += 1
 		# go down until key is found
-		while curr.is_real_node():
-			if curr.key == key:
-				return curr, edges
-			elif curr.key < key:
-				curr = curr.right
-			else:
-				curr = curr.left
-			edges += 1
+		node , edges_down = search_from(curr, key)
+		edges += edges_down
+		return node, edges
 
-		return None, edges-1
 
 
 	"""inserts a new node into the dictionary with corresponding key and value (starting at the root)
@@ -133,25 +116,22 @@ class AVLTree(object):
 			return new_node, edges, 0
 		# case B: parent is a leaf
 		promotes = 0
-		promote_height(parent)
-		promotes += 1
 
 		# rebalancing logic
 		curr = parent
-		bf = balance_factor(curr)
-		while (bf==1 or bf==-1)  and curr.parent: # if bf==0 we are done
+		bf = balance_factor(curr)# must be 1 or -1 the first time
+		while bf==1 or bf==-1: # if bf==0 we are done (since curr is for sure grater than the unchanged child but bf=0 -> childs same height less than parent)
 			# case 1 - promote
 			promote_height(curr)
 			promotes += 1
 			curr = curr.parent
-			bf = balance_factor(curr)
+			bf = balance_factor(curr) # notice if curr is none bf will be 0
 
 
 		# case 2 - rotate if needed once
 		if bf >1 or bf<-1:
 				rebalance(curr)
 		return new_node, edges, promotes
-
 
 
 
@@ -281,21 +261,55 @@ class AVLTree(object):
 		return self.root
 
 
-	def insert_position(self, key):#להחזיר מספר קשתות וצומת האבא
-		curr = self.root
-		curr_parent = None
-		edges = 1
-		while curr.is_real_node():
-			if curr.key == key:
-				return curr_parent, edges
-			elif curr.key < key:
-				curr_parent = curr
-				curr = curr.right
-			else:
-				curr_parent = curr
-				curr = curr.left
-			edges += 1
-		return None, edges - 1
+	# returns the parent of the node that should be the parent of the new node
+	# and the number of edges on the path from root to the new node
+	def insert_position(self, key):
+		_, edges, parent = search_from(self.root, key)
+		return parent, edges
 
-	def smm
 
+
+
+# stand-alone helper functions
+def balance_factor(node):
+	if not node or not node.is_real_node():
+		return 0
+	return node.left.height - node.right.height
+
+def promote_height(node):
+	if not node or not node.is_real_node():
+		return
+	node.height = 1 + max(node.left.height, node.right.height)
+
+def rebalance(curr):
+
+
+	pass
+
+
+"""
+search the key from node subtree. used in search and search finger and insert to reduce duplicate code
+
+	@type node: AVLNode
+	@param node: the node to start the search from
+	@param key: key of item that is to be inserted to self
+	@rtype: (AVLNode,int,AVLNode)
+	@returns: a 3-tuple (node,edges,parent) where node is the searched node,
+	edges is the number of edges on the path between the starting node and new node before rebalancing,
+	parent is the parent of the searched node. used in insert
+	"""
+#
+def search_from(node, key):
+	if not node or not node.is_real_node():
+		return None, 0
+	curr = node
+	edges = 0
+	while curr.is_real_node():
+		if curr.key == key:
+			return curr , edges+1, curr.parent
+		elif curr.key < key:
+			curr = curr.right
+		else:
+			curr = curr.left
+		edges += 1
+	return None, edges, curr.parent
