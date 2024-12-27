@@ -261,5 +261,5 @@ class AVLTree(object):
 			edges += 1
 		return None, edges - 1
 
-	def stammmmmmmm
+	def smm
 
