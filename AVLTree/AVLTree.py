@@ -178,7 +178,7 @@ class AVLTree(object):
 		node.left = None
 		node.right = None
 
-		# Traverse upwards from the given node to update the tree structure
+		# Traverse upwards from the given node to update the subtrees structure
 		currNode = node
 		while currNode.parent is not None:
 			parent = currNode.parent
@@ -231,8 +231,7 @@ class AVLTree(object):
 	@returns: the number of items in dictionary 
 	"""
 	def size(self):
-		# This function retrieves the root node of the tree and returns its 'size' attribute.
-		return self.get_root().size
+		return self.size
 
 
 	"""returns the root of the tree representing the dictionary
@@ -241,10 +240,4 @@ class AVLTree(object):
 	@returns: the root, None if the dictionary is empty
 	"""
 	def get_root(self):
-		# Start with the current node and traverse upwards to find the root
-		curr_node = self
-		while curr_node.parent is not None:
-			curr_node = curr_node.parent # Move to the parent node
-
-		# Return the root node
-		return curr_node
+		return self.root
