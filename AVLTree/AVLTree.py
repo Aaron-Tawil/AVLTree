@@ -42,10 +42,6 @@ EXTERNAL_LEAF = AVLNode(key=None, value=None)
 A class implementing an AVL tree.
 """
 
-
-
-
-
 class AVLTree(object):
 
 	"""
