@@ -7,7 +7,6 @@
 
 
 """A class represnting a node in an AVL tree"""
-
 class AVLNode(object):
 	"""Constructor, you are allowed to add more fields. 
 	
@@ -23,6 +22,8 @@ class AVLNode(object):
 		self.right = right
 		self.parent = parent
 		self.height = 0 if key is not None else -1
+		#just for testing TODO: remove
+		self.size = 0
 
 
 	"""returns whether self is not a virtual node 
@@ -71,7 +72,9 @@ class AVLTree(object):
 	and e is the number of edges on the path between the starting node- the maximum of tree and ending node+1.
 	"""
 	def finger_search(self, key):
-		ancestor , edges_up = self.finger_track_up(key)
+		if self.max is None:
+			return None, 0
+		ancestor , edges_up = self._finger_track_up(key)
 		# go down until key is found
 		node , edges_down, _ = _search_from(ancestor, key)
 		edges = edges_down + edges_up
@@ -79,11 +82,11 @@ class AVLTree(object):
 
 
 	# helper that finds first common ancestor of max and key and  used in finger_search and finger_insert
-	def finger_track_up(self, key):
+	def _finger_track_up(self, key):
 		curr = self.max_node()
 		edges = 0
 		# go up until key is in subtree of current node
-		while curr.is_real_node() and curr.parent and (curr.parent.key >= key):
+		while curr.parent is not None and (curr.parent.key >= key):
 			curr = curr.parent
 			edges += 1
 		return curr, edges
@@ -101,12 +104,13 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def insert(self, key, val):
+		#for testing
 		parent, edges = self._insert_position(key)
-		new_node , promotes = self.insert_to_parent(parent, key, val)
+		new_node , promotes = self._insert_to_parent(parent, key, val)
 		return new_node, edges, promotes
 
 	#helper function to insert a new node to the parent and handle all logic and rebalancing. used in insert and insert_finger
-	def insert_to_parent(self, parent, key, val):
+	def _insert_to_parent(self, parent, key, val):
 		if parent is None:
 			self.root = AVLNode(key, val, parent=None, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
 			self.size += 1
@@ -128,10 +132,10 @@ class AVLTree(object):
 		# case B: parent is a leaf
 		promotes = 0
 
-		# TODO: check if we can avoid duplicate code, join has same logic rebalancing logic
+		# TODO: check if we can avoid duplicate code, join has same rebalancing logic
 		curr = new_node
 		# case 1 - promote
-		while curr.height >= curr.parent.height:
+		while curr.parent is not None and curr.height >= curr.parent.height:
 			bf = _balance_factor(curr.parent)
 			# notice bf ==0 is impossible here.
 			if bf in [-1, 1]:  # case 1 - only promote
@@ -162,10 +166,15 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def finger_insert(self, key, val):
-		ancestor,edges_up =  self.finger_track_up(key)
+		if self.max is None:
+			self.root = AVLNode(key, val, parent=None, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
+			self.size += 1
+			self.max = self.root
+			return self.root, 0, 0
+		ancestor,edges_up =  self._finger_track_up(key)
 		_, edges_down, parent = _search_from(ancestor, key)
 		edges = edges_down + edges_up
-		new_node, promotes = self.insert_to_parent(parent, key, val)
+		new_node, promotes = self._insert_to_parent(parent, key, val)
 		return new_node, edges, promotes
 
 	"""deletes node from the dictionary
@@ -175,6 +184,8 @@ class AVLTree(object):
 	"""
 	def delete(self, node):
 		# TODO: implement
+		#for testing
+		print("enter delete")
 		return
 
 
@@ -192,8 +203,17 @@ class AVLTree(object):
 
 	def join(self, tree2, key, val):
 		# determine which tree is of greater keys
-		right_tree = self if self.max_node().key > key else tree2
-		left_tree = self if self.max_node().key < key else tree2
+		if tree2.root is None:
+			self.insert(key, val)
+			return
+		if self.root is None:
+			self.root = tree2.root
+			self.insert(key, val)
+			return
+
+
+		right_tree = self if self.root.key > key else tree2
+		left_tree = self if self.root.key < key else tree2
 
 		if left_tree.root.height > right_tree.root.height + 1:
 			return self._join_with_bigger_subtree(
@@ -275,8 +295,10 @@ class AVLTree(object):
 	# TODO: Update this function to calculate size,root,max dynamically for each tree
 	def split(self, node):
 		# Initialize the subtrees based on the given node
-		larger_than_node = node.right # Subtree with nodes larger than the current node's key
-		smaller_than_node = node.left # Subtree with nodes smaller than the current node's key
+		larger_than_node = AVLTree()
+		smaller_than_node = AVLTree()
+		larger_than_node.root = node.right # Subtree with nodes larger than the current node's key
+		smaller_than_node.root = node.left # Subtree with nodes smaller than the current node's key
 
 		# Disconnect the given node from its left and right children
 		node.left = None
@@ -286,17 +308,17 @@ class AVLTree(object):
 		currNode = node
 		while currNode.parent is not None:
 			parent = currNode.parent
-
+			tempTree = AVLTree()
 			if currNode.key > parent.key:# If the current node is in the right subtree of its parent
-				tempTree = parent.left
+				tempTree.root = parent.left
 				parent.left = None
 				# Join the parent's left subtree with the smaller subtree
-				smaller_than_node = tempTree.join(smaller_than_node, parent.key, parent.val)
+				smaller_than_node.join(tempTree, parent.key, parent.value)
 			else: # If the current node is in the left subtree of its parent
-				tempTree = parent.right
+				tempTree.root = parent.right
 				parent.right = None
 				# Join the parent's right subtree with the larger subtree
-				larger_than_node = larger_than_node.join(tempTree, currNode.key, currNode.val)
+				larger_than_node.join(tempTree, currNode.key, currNode.value)
 
 			# Move up to the parent node for the next iteration
 			currNode = parent
@@ -312,14 +334,16 @@ class AVLTree(object):
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
 	"""
 	def avl_to_array(self):
-		curr_node = self.root
-		if not curr_node.left and not curr_node.right:
-			return [(curr_node.key, curr_node.value)]
+		result = []
+		def inorder_traversal(node):
+			if not node or not node.is_real_node():
+				return
+			inorder_traversal(node.left)
+			result.append((node.key, node.value))
+			inorder_traversal(node.right)
 
-		left_subtree = curr_node.left.avl_to_array() if curr_node.left else []
-		right_subtree = curr_node.right.avl_to_array() if curr_node.right else []
-
-		return left_subtree + [(curr_node.key, curr_node.value)] + right_subtree
+		inorder_traversal(self.root)
+		return result
 
 	"""returns the node with the maximal key in the dictionary
 
@@ -386,85 +410,85 @@ def _rebalance(node):
 			_rotate_right(node.right)
 			return _rotate_left(node)
 	return node
+
 # rotates and returns the new root of the subtree, must ensure all is connected properly
-def _rotate_left(node):
+def _rotate_left(z):
+	#     z                              y
+	#    /  \                           / \
+	#   T1   y         Left Rotate     z   X
+	#       / \       ============>   / \
+	#      T2  X                    T1  T2
+	y = z.right
+	parent = z.parent
 
-	#TODO: implement rotate_left
-	return
+	t2 = y.left
+	z.right = t2
+	t2.parent = z
+	_update_height(z)
+
+	y.left = z
+	z.parent = y
+	_update_height(y)
+
+	y.parent = parent
+
+	# update parent
+	if parent is None:
+		return y
+	elif parent.left == z:
+		parent.left = y
+	else:
+		parent.right = y
+	return y
+
 # rotates and returns the new root of the subtree, must ensure all is connected properly
+def _rotate_right(z):
+	#       z                             y
+	#      / \                           / \
+	#     y   T3        Right Rotate    X   z
+	#    / \           ============>       / \
+	#   X   T2                           T2   T3
+	y = z.left
+	parent = z.parent
 
-def is_right_child(node):
-	#TODO: implement is_right_child
-	return
+	t2 = y.right
+	z.left = t2
+	t2.parent = z
+	_update_height(z)
 
-def _rotate_right(self, node):
-	subtree = node.left
-	parent = node.parent
+	y.right = z
+	z.parent = y
+	_update_height(y)
 
-	if subtree.right.is_real_node():
-		subtree_child = subtree.right
-		node.left = subtree_child
-		subtree_child.parent = node
-		node.height = max(node.right.height, node.left.height) +1
+	y.parent = parent
+
+	# update parent
+	if parent is None:
+		return y
+	elif parent.left == z:
+		parent.left = y
 	else:
-		node.right = None
-		node.height = node.left.height + 1
+		parent.right = y
+	return y
 
-	subtree.right = node
-	node.parent = subtree
-	subtree.parent = parent
-
-
-	if node.parent == None:
-		return subtree
-	elif node.parent.left == node:
-		node.parent.left = subtree
-	else:
-		node.parent.right = subtree
-
-	return subtree
-
-def rotate_left(node):
-	subtree = node.right
-	parent = node.parent
-	if subtree.left.is_real_node():
-		subtree_child = subtree.left
-		node.right = subtree_child
-		subtree_child.parent = node
-		node.height = max(node.left.height, node.right.height) + 1
-	else:
-		node.right = None
-		node.height = node.left.height + 1
-
-	subtree.left = node
-	node.parent = subtree
-	subtree.parent = parent
-
-	if node.parent is None:
-		return subtree
-	elif node.parent.left == node:
-		node.parent.left = subtree
-	else:
-		node.parent.right = subtree
-	return subtree
-
-"""
-	@returns: a 3-tuple (node,edges,parent) where node is the searched node or none if not found,
-	edges is the number of edges on the path between the starting node and new node ,
-	parent is the parent of the searched node. used in insert
-	"""
+# @returns: a 3-tuple (node,edges,parent) where node is the searched node or none if not found,
+# edges is the number of edges on the path between the starting node and new node ,
+# parent is the parent of the searched node. used in insert
 def _search_from(node, key):
-	if not node or not node.is_real_node():
-		return None, 0
+	if node is None or not node.is_real_node():
+		return None, 0, None
 	curr = node
 	edges = 0
+	parent = node
 	while curr.is_real_node():
 		if curr.key == key:
 			return curr , edges+1, curr.parent
 		elif curr.key < key:
+			parent = curr
 			curr = curr.right
 		else:
+			parent = curr
 			curr = curr.left
 		edges += 1
-	return None, edges, curr.parent
+	return None, edges, parent
 
