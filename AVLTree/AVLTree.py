@@ -363,12 +363,18 @@ def _update_height(node):
 #cheks what rotation is needed (should handle all cases possible) and calls the appropriate function finally returns the new root of the subtree
 def _rebalance(curr):
 	#TODO: implement rebalance
+
+
+
+
+
+
 	return curr
-# rotates and returns the new root of the subtree
+# rotates and returns the new root of the subtree, must ensure all is connected properly
 def _rotate_left(node):
 	#TODO: implement rotate_left
 	return
-# rotates and returns the new root of the subtree
+# rotates and returns the new root of the subtree, must ensure all is connected properly
 def _rotate_right(node):
 	#TODO: implement rotate_right
 	return
