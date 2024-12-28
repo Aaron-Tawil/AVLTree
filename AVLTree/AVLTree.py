@@ -62,7 +62,7 @@ class AVLTree(object):
 	and e is the number of edges on the path between the starting node and ending node+1.
 	"""
 	def search(self, key):
-		return search_from(self.root, key)
+		return _search_from(self.root, key)
 
 	"""searches for a node in the dictionary corresponding to the key, starting at the max
         
@@ -80,7 +80,7 @@ class AVLTree(object):
 			curr = curr.parent
 			edges += 1
 		# go down until key is found
-		node , edges_down = search_from(curr, key)
+		node , edges_down = _search_from(curr, key)
 		edges += edges_down
 		return node, edges
 
@@ -99,7 +99,7 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def insert(self, key, val):
-		parent, edges = self.insert_position(key)
+		parent, edges = self._insert_position(key)
 		if parent is None:
 			self.root = AVLNode(key, val, parent=None, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
 			self.size += 1
@@ -122,21 +122,21 @@ class AVLTree(object):
 		promotes = 0
 
 		# rebalancing logic
-		curr = parent
-		bf = balance_factor(curr)# must be 1 or -1 the first time
-		while bf==1 or bf==-1: # if bf==0 we are done (since curr is for sure grater than the unchanged child but bf=0 -> childs same height less than parent)
-			# case 1 - promote
-			update_height(curr)
+		curr = new_node
+		bf = _balance_factor(curr.parent)# must be 1 or -1 the first time
+		# case 1 - promote
+		while bf in [-1,1] and curr.height >= curr.parent : # if bf==0 we are done (since curr.parent is for sure grater than the unchanged child but bf=0 -> childs same height less than parent)
+			_update_height(curr.parent)
 			promotes += 1
 			curr = curr.parent
-			bf = balance_factor(curr) # notice if curr is none bf will be 0
+			bf = _balance_factor(curr.parent) # notice if curr is none bf will be 0
 
 		# case 2 - rotate if needed once
 		if bf >1 or bf<-1:
-			rebalance(curr)
+			_rebalance(curr)
 
-		# check if root has changed due to rotations. actually will run max 2 times
-		while self.root.parent is not None:
+		# check if root has changed due to rotations. in any rotation on the root it drops maximum by 1
+		if self.root.parent is not None:
 			self.root = self.root.parent
 
 		return new_node, edges, promotes
@@ -231,28 +231,32 @@ class AVLTree(object):
 
 		curr.parent = x_node
 		smaller_tree.root.parent = x_node
+		_update_height(x_node)
+
+
+
 
 		# rebalance from x_node to root
-		update_height(x_node)
 		curr = x_node.parent
-		bf = balance_factor(curr)
-
+		bf = _balance_factor(curr)
 		# rebalancing logic
 		while bf != 0:
 			if bf in [-1, 1]:  # case 1 - promote
-				update_height(curr)
+				_update_height(curr)
 				curr = curr.parent
-				bf = balance_factor(curr)
-			else:
-				curr = rebalance(curr)
+				bf = _balance_factor(curr)
+			else: # case 2 - rotate
+				curr = _rebalance(curr)
 				curr = curr.parent
-				bf = balance_factor(curr)
+				bf = _balance_factor(curr)
 
-		# check if root has changed due to rotations, max 2 iterations
-		while bigger_tree.root.parent is not None:
+
+
+		# check if root has changed due to rotations. in any rotation on the root it drops maximum by 1
+		if bigger_tree.root.parent is not None:
 			bigger_tree.root = bigger_tree.root.parent
 
-		# The right tree is the smaller tree if is_left_bigger is True, otherwise it's the bigger tree
+
 		self.max = smaller_tree.max if is_left_bigger else bigger_tree.max
 		self.root = bigger_tree.root
 		self.size = bigger_tree.size + smaller_tree.size + 1
@@ -347,35 +351,35 @@ class AVLTree(object):
 
 	# returns the parent of the node that should be the parent of the new node
 	# and the number of edges on the path from root to the new node
-	def insert_position(self, key):
-		_, edges, parent = search_from(self.root, key)
+	def _insert_position(self, key):
+		_, edges, parent = _search_from(self.root, key)
 		return parent, edges
 
 
 
 
 # stand-alone helper functions
-def balance_factor(node):
+def _balance_factor(node):
 	if not node or not node.is_real_node():
 		return 0
 	return node.left.height - node.right.height
 
-def update_height(node):
+def _update_height(node):
 	if not node or not node.is_real_node():
 		return
 	node.height = 1 + max(node.left.height, node.right.height)
 
 
 #cheks what rotation is needed (should handle all cases possible) and calls the appropriate function finally returns the new root of the subtree
-def rebalance(curr):
+def _rebalance(curr):
 	#TODO: implement rebalance
 	return curr
 # rotates and returns the new root of the subtree
-def rotate_left(node):
+def _rotate_left(node):
 	#TODO: implement rotate_left
 	return
 # rotates and returns the new root of the subtree
-def rotate_right(node):
+def _rotate_right(node):
 	#TODO: implement rotate_right
 	return
 
@@ -385,7 +389,7 @@ def rotate_right(node):
 	edges is the number of edges on the path between the starting node and new node ,
 	parent is the parent of the searched node. used in insert
 	"""
-def search_from(node, key):
+def _search_from(node, key):
 	if not node or not node.is_real_node():
 		return None, 0
 	curr = node
