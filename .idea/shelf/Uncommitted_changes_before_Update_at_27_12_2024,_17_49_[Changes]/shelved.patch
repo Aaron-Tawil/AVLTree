@@ -1,0 +1,205 @@
+Index: AVLTree/AVLTree.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#id1:\n#name1:\n#username1:\n#id2:345778039\n#name2:Aaron Tawil\n#username2:aarondavidt\n\n\n\"\"\"A class represnting a node in an AVL tree\"\"\"\n\nclass AVLNode(object):\n\t\"\"\"Constructor, you are allowed to add more fields. \n\t\n\t@type key: int\n\t@param key: key of your node\n\t@type value: string\n\t@param value: data of your node\n\t\"\"\"\n\tdef __init__(self, key, value, left=None, right=None, parent=None):\n\t\tself.key = key\n\t\tself.value = value\n\t\tself.left = left\n\t\tself.right = right\n\t\tself.parent = parent\n\t\tself.height = 0 if key is not None else -1\n\t\t\n\n\t\"\"\"returns whether self is not a virtual node \n\n\t@rtype: bool\n\t@returns: False if self is a virtual node, True otherwise.\n\t\"\"\"\n\tdef is_real_node(self):\n\t\treturn self.key is not None\n\n\n# Define the external leaf as singleton object (all external will point to this)\nEXTERNAL_LEAF = AVLNode(key=None, value=None)\n\n\n\"\"\"\nA class implementing an AVL tree.\n\"\"\"\n\nclass AVLTree(object):\n\n\t\"\"\"\n\tConstructor, you are allowed to add more fields.\n\t\"\"\"\n\tdef __init__(self):\n\t\tself.root = None\n\t\tself.size = 0  # Number of real nodes in the tree\n\t\tself.max = self.root # pointer to maximum node\n\n\t\"\"\"searches for a node in the dictionary corresponding to the key (starting at the root)\n        \n\t@type key: int\n\t@param key: a key to be searched\n\t@rtype: (AVLNode,int)\n\t@returns: a tuple (x,e) where x is the node corresponding to key (or None if not found),\n\tand e is the number of edges on the path between the starting node and ending node+1.\n\t\"\"\"\n\tdef search(self, key):\n\t\tcurr = self.root\n\t\tedges = 1\n\t\twhile curr.is_real_node():\n\t\t\tif curr.key == key:\n\t\t\t\treturn curr, edges\n\t\t\telif curr.key < key:\n\t\t\t\tcurr = curr.right\n\t\t\telse:\n\t\t\t\tcurr = curr.left\n\t\t\tedges += 1\n\t\treturn None, edges-1\n\n\n\t\"\"\"searches for a node in the dictionary corresponding to the key, starting at the max\n        \n\t@type key: int\n\t@param key: a key to be searched\n\t@rtype: (AVLNode,int)\n\t@returns: a tuple (x,e) where x is the node corresponding to key (or None if not found),\n\tand e is the number of edges on the path between the starting node- the maximum of tree and ending node+1.\n\t\"\"\"\n\tdef finger_search(self, key):\n\t\tcurr = self.max_node()\n\t\tedges = 1\n\t\t# go up until key is in subtree of current node\n\t\twhile curr.is_real_node() and curr.parent and (curr.parent.key >= key):\n\t\t\tcurr = curr.parent\n\t\t\tedges += 1\n\t\t# go down until key is found\n\t\twhile curr.is_real_node():\n\t\t\tif curr.key == key:\n\t\t\t\treturn curr, edges\n\t\t\telif curr.key < key:\n\t\t\t\tcurr = curr.right\n\t\t\telse:\n\t\t\t\tcurr = curr.left\n\t\t\tedges += 1\n\n\t\treturn None, edges-1\n\n\n\t\"\"\"inserts a new node into the dictionary with corresponding key and value (starting at the root)\n\n\t@type key: int\n\t@pre: key currently does not appear in the dictionary\n\t@param key: key of item that is to be inserted to self\n\t@type val: string\n\t@param val: the value of the item\n\t@rtype: (AVLNode,int,int)\n\t@returns: a 3-tuple (x,e,h) where x is the new node,\n\te is the number of edges on the path between the starting node and new node before rebalancing,\n\tand h is the number of PROMOTE cases during the AVL rebalancing\n\t\"\"\"\n\tdef insert(self, key, val):\n\t\treturn None, -1, -1\n\n\n\n\n\t\"\"\"inserts a new node into the dictionary with corresponding key and value, starting at the max\n\n\t@type key: int\n\t@pre: key currently does not appear in the dictionary\n\t@param key: key of item that is to be inserted to self\n\t@type val: string\n\t@param val: the value of the item\n\t@rtype: (AVLNode,int,int)\n\t@returns: a 3-tuple (x,e,h) where x is the new node,\n\te is the number of edges on the path between the starting node and new node before rebalancing,\n\tand h is the number of PROMOTE cases during the AVL rebalancing\n\t\"\"\"\n\tdef finger_insert(self, key, val):\n\t\treturn None, -1, -1\n\n\n\t\"\"\"deletes node from the dictionary\n\n\t@type node: AVLNode\n\t@pre: node is a real pointer to a node in self\n\t\"\"\"\n\tdef delete(self, node):\n\t\treturn\t\n\n\t\n\t\"\"\"joins self with item and another AVLTree\n\n\t@type tree2: AVLTree \n\t@param tree2: a dictionary to be joined with self\n\t@type key: int \n\t@param key: the key separting self and tree2\n\t@type val: string\n\t@param val: the value corresponding to key\n\t@pre: all keys in self are smaller than key and all keys in tree2 are larger than key,\n\tor the opposite way\n\t\"\"\"\n\tdef join(self, tree2, key, val):\n\t\treturn\n\t#  בפונקציה ספליטה השתמשתי בפונקציה הזו גם עבור מקרה זבו אחד מהעצים הוא ריק, אז או לטפל בזה כאן או לטפל בזה במתודה split\n\t\"\"\"splits the dictionary at a given node\n\n\t@type node: AVLNode\n\t@pre: node is in self\n\t@param node: the node in the dictionary to be used for the split\n\t@rtype: (AVLTree, AVLTree)\n\t@returns: a tuple (left, right), where left is an AVLTree representing the keys in the \n\tdictionary smaller than node.key, and right is an AVLTree representing the keys in the \n\tdictionary larger than node.key.\n\t\"\"\"\n\n\t# TODO: Update this function to calculate size,root,max dynamically for each tree\n\tdef split(self, node):\n\t\t# Initialize the subtrees based on the given node\n\t\tlarger_than_node = node.right # Subtree with nodes larger than the current node's key\n\t\tsmaller_than_node = node.left # Subtree with nodes smaller than the current node's key\n\n\t\t# Disconnect the given node from its left and right children\n\t\tnode.left = None\n\t\tnode.right = None\n\n\t\t# Traverse upwards from the given node to update the subtrees structure\n\t\tcurrNode = node\n\t\twhile currNode.parent is not None:\n\t\t\tparent = currNode.parent\n\n\t\t\tif currNode.key > parent.key:# If the current node is in the right subtree of its parent\n\t\t\t\ttempTree = parent.left\n\t\t\t\tparent.left = None\n\t\t\t\t# Join the parent's left subtree with the smaller subtree\n\t\t\t\tsmaller_than_node = tempTree.join(smaller_than_node, parent.key, parent.val)\n\t\t\telse: # If the current node is in the left subtree of its parent\n\t\t\t\ttempTree = parent.right\n\t\t\t\tparent.right = None\n\t\t\t\t# Join the parent's right subtree with the larger subtree\n\t\t\t\tlarger_than_node = larger_than_node.join(tempTree, currNode.key, currNode.val)\n\n\t\t\t# Move up to the parent node for the next iteration\n\t\t\tcurrNode = parent\n\n\t\t# Return the two resulting subtrees\n\t\treturn larger_than_node, smaller_than_node\n\n\n\n\t\"\"\"returns an s array representing dictionary \n\n\t@rtype: list\n\t@returns: a sorted list according to key of touples (key, value) representing the data structure\n\t\"\"\"\n\tdef avl_to_array(self):\n\t\tcurr_node = self.root\n\t\tif not curr_node.left and not curr_node.right:\n\t\t\treturn [(curr_node.key, curr_node.value)]\n\n\t\tleft_subtree = curr_node.left.avl_to_array() if curr_node.left else []\n\t\tright_subtree = curr_node.right.avl_to_array() if curr_node.right else []\n\n\t\treturn left_subtree + [(curr_node.key, curr_node.value)] + right_subtree\n\n\t\"\"\"returns the node with the maximal key in the dictionary\n\n\t@rtype: AVLNode\n\t@returns: the maximal node, None if the dictionary is empty\n\t\"\"\"\n\tdef max_node(self):\n\t\treturn self.max\n\n\t\"\"\"returns the number of items in dictionary \n\n\t@rtype: int\n\t@returns: the number of items in dictionary \n\t\"\"\"\n\tdef size(self):\n\t\treturn self.size\n\n\n\t\"\"\"returns the root of the tree representing the dictionary\n\n\t@rtype: AVLNode\n\t@returns: the root, None if the dictionary is empty\n\t\"\"\"\n\tdef get_root(self):\n\t\treturn self.root\n\n\n\tdef insert_position(self, key):#להחזיר מספר קשתות וצומת האבא\n\t\tcurr = self.root\n\t\tcurr_parent = None\n\t\tedges = 1\n\t\twhile curr.is_real_node():\n\t\t\tif curr.key == key:\n\t\t\t\treturn curr_parent, edges\n\t\t\telif curr.key < key:\n\t\t\t\tcurr_parent = curr\n\t\t\t\tcurr = curr.right\n\t\t\telse:\n\t\t\t\tcurr_parent = curr\n\t\t\t\tcurr = curr.left\n\t\t\tedges += 1\n\t\treturn None, edges - 1\n\n\tdef smm\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/AVLTree/AVLTree.py b/AVLTree/AVLTree.py
+--- a/AVLTree/AVLTree.py	(revision baae6cb7985bd1a4100e00eb09ca0f6688e792a0)
++++ b/AVLTree/AVLTree.py	(date 1735314549202)
+@@ -33,6 +33,32 @@
+ 	def is_real_node(self):
+ 		return self.key is not None
+ 
++	def is_left_child(node):
++		if node is None or node.parent is None:
++			return False
++
++		return node == node.parent.left
++
++	def is_right_child(self):
++		if self is None or self.parent is None:
++			return False
++
++		return self == self.parent.right
++
++	def rotate_right(self, node):
++		temp_node_left = node.left
++		if self.is_right_child():
++			self.parent.right = node
++			node.parent = self.parent
++			node.right = self
++			self.parent = node
++			self.right = temp_node_left
++			temp_node_left.parent = self
++			node.height = self.height
++
++
++		return None
++
+ 
+ # Define the external leaf as singleton object (all external will point to this)
+ EXTERNAL_LEAF = AVLNode(key=None, value=None)
+@@ -245,21 +271,25 @@
+ 		return self.root
+ 
+ 
+-	def insert_position(self, key):#להחזיר מספר קשתות וצומת האבא
++	def insert_position(self, key):
++		# Start at the root of the tree.
+ 		curr = self.root
+ 		curr_parent = None
+ 		edges = 1
++		# Continue traversing as long as the current node is real.
+ 		while curr.is_real_node():
+-			if curr.key == key:
+-				return curr_parent, edges
+-			elif curr.key < key:
+-				curr_parent = curr
+-				curr = curr.right
+-			else:
+-				curr_parent = curr
++			curr_parent = curr
++			if key < curr.key:
+ 				curr = curr.left
+-			edges += 1
+-		return None, edges - 1
++				edges += 1
++			elif key > curr.key:
++				curr = curr.right
++				edges += 1
++		# Return the parent and the total number of edges traversed
++		return curr_parent, edges - 1
++
++
++
+ 
+-	def smm
++
+ 
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"AutoImportSettings\">\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\n  </component>\n  <component name=\"ChangeListManager\">\n    <list default=\"true\" id=\"82d91d4e-5bec-43c3-910e-45d9c33290e6\" name=\"Changes\" comment=\"&quot;insert_position&quot;\">\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\n    </list>\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\n  </component>\n  <component name=\"FileTemplateManagerImpl\">\n    <option name=\"RECENT_TEMPLATES\">\n      <list>\n        <option value=\"Python Script\" />\n      </list>\n    </option>\n  </component>\n  <component name=\"Git.Settings\">\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\n      <map>\n        <entry key=\"$PROJECT_DIR$\" value=\"master\" />\n      </map>\n    </option>\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\n  </component>\n  <component name=\"ProjectColorInfo\">{\n  &quot;associatedIndex&quot;: 0\n}</component>\n  <component name=\"ProjectId\" id=\"2q6vVyxa7A5yIuf3rSyvUNZdWgb\" />\n  <component name=\"ProjectViewState\">\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\n    <option name=\"showLibraryContents\" value=\"true\" />\n  </component>\n  <component name=\"PropertiesComponent\"><![CDATA[{\n  \"keyToString\": {\n    \"Python tests.Python tests in Tester.py.executor\": \"Run\",\n    \"Python.ex2-q2.executor\": \"Run\",\n    \"Python.hello.executor\": \"Run\",\n    \"Python.testtt.executor\": \"Run\",\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\n    \"RunOnceActivity.git.unshallow\": \"true\",\n    \"git-widget-placeholder\": \"Haim\",\n    \"node.js.detected.package.eslint\": \"true\",\n    \"node.js.detected.package.tslint\": \"true\",\n    \"node.js.selected.package.eslint\": \"(autodetect)\",\n    \"node.js.selected.package.tslint\": \"(autodetect)\",\n    \"nodejs_package_manager_path\": \"npm\",\n    \"vue.rearranger.settings.migration\": \"true\"\n  }\n}]]></component>\n  <component name=\"RunManager\" selected=\"Python tests.Python tests in Tester.py\">\n    <configuration name=\"testtt\" type=\"PythonConfigurationType\" factoryName=\"Python\" temporary=\"true\" nameIsGenerated=\"true\">\n      <module name=\"AVLTree\" />\n      <option name=\"ENV_FILES\" value=\"\" />\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\n      <option name=\"PARENT_ENVS\" value=\"true\" />\n      <envs>\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\n      </envs>\n      <option name=\"SDK_HOME\" value=\"\" />\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$/AVLTree\" />\n      <option name=\"IS_MODULE_SDK\" value=\"true\" />\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/AVLTree/testtt.py\" />\n      <option name=\"PARAMETERS\" value=\"\" />\n      <option name=\"SHOW_COMMAND_LINE\" value=\"false\" />\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\n      <option name=\"MODULE_MODE\" value=\"false\" />\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\n      <option name=\"INPUT_FILE\" value=\"\" />\n      <method v=\"2\" />\n    </configuration>\n    <configuration name=\"Python tests in Tester.py\" type=\"tests\" factoryName=\"Autodetect\" temporary=\"true\" nameIsGenerated=\"true\">\n      <module name=\"AVLTree\" />\n      <option name=\"ENV_FILES\" value=\"\" />\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\n      <option name=\"PARENT_ENVS\" value=\"true\" />\n      <option name=\"SDK_HOME\" value=\"\" />\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$/AVLTree\" />\n      <option name=\"IS_MODULE_SDK\" value=\"true\" />\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\n      <EXTENSION ID=\"PythonCoverageRunConfigurationExtension\" runner=\"coverage.py\" />\n      <option name=\"_new_additionalArguments\" value=\"&quot;&quot;\" />\n      <option name=\"_new_target\" value=\"&quot;$PROJECT_DIR$/AVLTree/Tester.py&quot;\" />\n      <option name=\"_new_targetType\" value=\"&quot;PATH&quot;\" />\n      <method v=\"2\" />\n    </configuration>\n    <recent_temporary>\n      <list>\n        <item itemvalue=\"Python tests.Python tests in Tester.py\" />\n        <item itemvalue=\"Python.testtt\" />\n        <item itemvalue=\"Python tests.Python tests in Tester.py\" />\n        <item itemvalue=\"Python.testtt\" />\n        <item itemvalue=\"Python tests.Python tests in Tester.py\" />\n      </list>\n    </recent_temporary>\n  </component>\n  <component name=\"SharedIndexes\">\n    <attachedChunks>\n      <set>\n        <option value=\"bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-PY-243.21565.199\" />\n        <option value=\"bundled-python-sdk-cab1f2013843-4ae2d6a61b08-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.21565.199\" />\n      </set>\n    </attachedChunks>\n  </component>\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\n  <component name=\"TaskManager\">\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\n      <changelist id=\"82d91d4e-5bec-43c3-910e-45d9c33290e6\" name=\"Changes\" comment=\"\" />\n      <created>1733995871449</created>\n      <option name=\"number\" value=\"Default\" />\n      <option name=\"presentableId\" value=\"Default\" />\n      <updated>1733995871449</updated>\n      <workItem from=\"1733995874939\" duration=\"783000\" />\n      <workItem from=\"1733996752400\" duration=\"78000\" />\n      <workItem from=\"1733996885606\" duration=\"367000\" />\n      <workItem from=\"1733997263288\" duration=\"191000\" />\n      <workItem from=\"1733997674742\" duration=\"438000\" />\n      <workItem from=\"1734431854199\" duration=\"530000\" />\n      <workItem from=\"1734795522320\" duration=\"332000\" />\n      <workItem from=\"1734795868483\" duration=\"1225000\" />\n      <workItem from=\"1735243827997\" duration=\"19936000\" />\n    </task>\n    <task id=\"LOCAL-00001\" summary=\"&quot;test&quot;\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1733997804823</created>\n      <option name=\"number\" value=\"00001\" />\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1733997804823</updated>\n    </task>\n    <task id=\"LOCAL-00002\" summary=\"&quot;The last four&quot;\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1735298783039</created>\n      <option name=\"number\" value=\"00002\" />\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1735298783040</updated>\n    </task>\n    <task id=\"LOCAL-00003\" summary=\" &quot;Correction of the last four according to the self&quot;\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1735299529776</created>\n      <option name=\"number\" value=\"00003\" />\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1735299529776</updated>\n    </task>\n    <task id=\"LOCAL-00004\" summary=\"&quot;insert_position&quot;\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1735302621129</created>\n      <option name=\"number\" value=\"00004\" />\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1735302621129</updated>\n    </task>\n    <task id=\"LOCAL-00005\" summary=\"&quot;insert_position&quot;\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1735302658947</created>\n      <option name=\"number\" value=\"00005\" />\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1735302658947</updated>\n    </task>\n    <option name=\"localTasksCounter\" value=\"6\" />\n    <servers />\n  </component>\n  <component name=\"TypeScriptGeneratedFilesManager\">\n    <option name=\"version\" value=\"3\" />\n  </component>\n  <component name=\"VcsManagerConfiguration\">\n    <MESSAGE value=\"&quot;test&quot;\" />\n    <MESSAGE value=\"&quot;The last four&quot;\" />\n    <MESSAGE value=\" &quot;Correction of the last four according to the self&quot;\" />\n    <MESSAGE value=\"&quot;insert_position&quot;\" />\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"&quot;insert_position&quot;\" />\n  </component>\n  <component name=\"com.intellij.coverage.CoverageDataManagerImpl\">\n    <SUITE FILE_PATH=\"coverage/AVLTree$.coverage\" NAME=\" Coverage Results\" MODIFIED=\"1734796329655\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/AVLTree\" />\n    <SUITE FILE_PATH=\"coverage/AVLTree$testtt.coverage\" NAME=\"testtt Coverage Results\" MODIFIED=\"1734796189203\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/AVLTree\" />\n    <SUITE FILE_PATH=\"coverage/AVLTree$ex2_q2.coverage\" NAME=\"ex2-q2 Coverage Results\" MODIFIED=\"1734432038203\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/../ex2\" />\n    <SUITE FILE_PATH=\"coverage/AVLTree$hello.coverage\" NAME=\"hello Coverage Results\" MODIFIED=\"1733997772224\" SOURCE_PROVIDER=\"com.intellij.coverage.DefaultCoverageFileProvider\" RUNNER=\"coverage.py\" COVERAGE_BY_TEST_ENABLED=\"false\" COVERAGE_TRACING_ENABLED=\"false\" WORKING_DIRECTORY=\"$PROJECT_DIR$/AVLTree\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision baae6cb7985bd1a4100e00eb09ca0f6688e792a0)
++++ b/.idea/workspace.xml	(date 1735314329489)
+@@ -6,6 +6,7 @@
+   <component name="ChangeListManager">
+     <list default="true" id="82d91d4e-5bec-43c3-910e-45d9c33290e6" name="Changes" comment="&quot;insert_position&quot;">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/AVLTree/AVLTree.py" beforeDir="false" afterPath="$PROJECT_DIR$/AVLTree/AVLTree.py" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -22,7 +23,7 @@
+   <component name="Git.Settings">
+     <option name="RECENT_BRANCH_BY_REPOSITORY">
+       <map>
+-        <entry key="$PROJECT_DIR$" value="master" />
++        <entry key="$PROJECT_DIR$" value="Haim" />
+       </map>
+     </option>
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+@@ -35,23 +36,23 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent"><![CDATA[{
+-  "keyToString": {
+-    "Python tests.Python tests in Tester.py.executor": "Run",
+-    "Python.ex2-q2.executor": "Run",
+-    "Python.hello.executor": "Run",
+-    "Python.testtt.executor": "Run",
+-    "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "RunOnceActivity.git.unshallow": "true",
+-    "git-widget-placeholder": "Haim",
+-    "node.js.detected.package.eslint": "true",
+-    "node.js.detected.package.tslint": "true",
+-    "node.js.selected.package.eslint": "(autodetect)",
+-    "node.js.selected.package.tslint": "(autodetect)",
+-    "nodejs_package_manager_path": "npm",
+-    "vue.rearranger.settings.migration": "true"
++  <component name="PropertiesComponent">{
++  &quot;keyToString&quot;: {
++    &quot;Python tests.Python tests in Tester.py.executor&quot;: &quot;Run&quot;,
++    &quot;Python.ex2-q2.executor&quot;: &quot;Run&quot;,
++    &quot;Python.hello.executor&quot;: &quot;Run&quot;,
++    &quot;Python.testtt.executor&quot;: &quot;Run&quot;,
++    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
++    &quot;git-widget-placeholder&quot;: &quot;Haim&quot;,
++    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
++    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
++    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
++    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
++    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
++    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+   }
+-}]]></component>
++}</component>
+   <component name="RunManager" selected="Python tests.Python tests in Tester.py">
+     <configuration name="testtt" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+       <module name="AVLTree" />
+@@ -126,7 +127,8 @@
+       <workItem from="1734431854199" duration="530000" />
+       <workItem from="1734795522320" duration="332000" />
+       <workItem from="1734795868483" duration="1225000" />
+-      <workItem from="1735243827997" duration="19936000" />
++      <workItem from="1735243827997" duration="22478000" />
++      <workItem from="1735310467110" duration="2727000" />
+     </task>
+     <task id="LOCAL-00001" summary="&quot;test&quot;">
+       <option name="closed" value="true" />
+@@ -168,11 +170,46 @@
+       <option name="project" value="LOCAL" />
+       <updated>1735302658947</updated>
+     </task>
+-    <option name="localTasksCounter" value="6" />
++    <task id="LOCAL-00006" summary="&quot;insert_position&quot;">
++      <option name="closed" value="true" />
++      <created>1735304432809</created>
++      <option name="number" value="00006" />
++      <option name="presentableId" value="LOCAL-00006" />
++      <option name="project" value="LOCAL" />
++      <updated>1735304432809</updated>
++    </task>
++    <task id="LOCAL-00007" summary="&quot;insert_position&quot;">
++      <option name="closed" value="true" />
++      <created>1735304522603</created>
++      <option name="number" value="00007" />
++      <option name="presentableId" value="LOCAL-00007" />
++      <option name="project" value="LOCAL" />
++      <updated>1735304522603</updated>
++    </task>
++    <task id="LOCAL-00008" summary="&quot;insert_position&quot;">
++      <option name="closed" value="true" />
++      <created>1735304546292</created>
++      <option name="number" value="00008" />
++      <option name="presentableId" value="LOCAL-00008" />
++      <option name="project" value="LOCAL" />
++      <updated>1735304546292</updated>
++    </task>
++    <option name="localTasksCounter" value="9" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+     <option name="version" value="3" />
++  </component>
++  <component name="Vcs.Log.Tabs.Properties">
++    <option name="TAB_STATES">
++      <map>
++        <entry key="MAIN">
++          <value>
++            <State />
++          </value>
++        </entry>
++      </map>
++    </option>
+   </component>
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="&quot;test&quot;" />

@@ -351,6 +351,7 @@ class AVLTree(object):
 
 
 
+
 	# returns the parent of the node that should be the parent of the new node
 	# and the number of edges on the path from root to the new node
 	def _insert_position(self, key):
