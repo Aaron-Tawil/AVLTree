@@ -85,7 +85,6 @@ class AVLTree(object):
 		return node, edges
 
 
-
 	"""inserts a new node into the dictionary with corresponding key and value (starting at the root)
 
 	@type key: int
@@ -121,27 +120,26 @@ class AVLTree(object):
 		# case B: parent is a leaf
 		promotes = 0
 
-		# rebalancing logic
+		# TODO: check if we can avoid duplicate code, join has same logic rebalancing logic
 		curr = new_node
-		bf = _balance_factor(curr.parent)# must be 1 or -1 the first time
 		# case 1 - promote
-		while bf in [-1,1] and curr.height >= curr.parent : # if bf==0 we are done (since curr.parent is for sure grater than the unchanged child but bf=0 -> childs same height less than parent)
-			_update_height(curr.parent)
-			promotes += 1
-			curr = curr.parent
-			bf = _balance_factor(curr.parent) # notice if curr is none bf will be 0
+		while curr.height >= curr.parent.height:
+			bf = _balance_factor(curr.parent)
+			# notice bf ==0 is impossible here.
+			if bf in [-1, 1]:  # case 1 - only promote
+				_update_height(curr.parent)
+				promotes += 1
+				curr = curr.parent
+			else:
+				curr = _rebalance(curr.parent)
+				break # we break since we now in this case we finish
 
-		# case 2 - rotate if needed once
-		if bf >1 or bf<-1:
-			_rebalance(curr)
 
 		# check if root has changed due to rotations. in any rotation on the root it drops maximum by 1
 		if self.root.parent is not None:
 			self.root = self.root.parent
 
 		return new_node, edges, promotes
-
-
 
 
 	"""inserts a new node into the dictionary with corresponding key and value, starting at the max
@@ -228,34 +226,25 @@ class AVLTree(object):
 		else:
 			x_node = AVLNode(key, val, parent=curr.parent, left=smaller_tree.root, right=curr)
 			curr.parent.left = x_node
-
 		curr.parent = x_node
 		smaller_tree.root.parent = x_node
 		_update_height(x_node)
 
-
-
-
 		# rebalance from x_node to root
-		curr = x_node.parent
-		bf = _balance_factor(curr)
+		curr = x_node
 		# rebalancing logic
-		while bf != 0:
-			if bf in [-1, 1]:  # case 1 - promote
-				_update_height(curr)
+		while curr.height >= curr.parent.height :
+			bf = _balance_factor(curr.parent)
+			# notice bf ==0 is impossible here.
+			if bf in [-1, 1]:  # case 1 - only promote
+				_update_height(curr.parent)
 				curr = curr.parent
-				bf = _balance_factor(curr)
 			else: # case 2 - rotate
-				curr = _rebalance(curr)
-				curr = curr.parent
-				bf = _balance_factor(curr)
-
-
+				curr = _rebalance(curr.parent)
 
 		# check if root has changed due to rotations. in any rotation on the root it drops maximum by 1
 		if bigger_tree.root.parent is not None:
 			bigger_tree.root = bigger_tree.root.parent
-
 
 		self.max = smaller_tree.max if is_left_bigger else bigger_tree.max
 		self.root = bigger_tree.root
@@ -347,6 +336,7 @@ class AVLTree(object):
 	"""
 	def get_root(self):
 		return self.root
+
 
 
 	# returns the parent of the node that should be the parent of the new node
