@@ -36,7 +36,6 @@ class AVLNode(object):
 	def is_real_node(self):
 		return self.key is not None
 
-
 # Define the external leaf as singleton object (all external will point to this)
 EXTERNAL_LEAF = AVLNode(key=None, value=None)
 
@@ -44,10 +43,6 @@ EXTERNAL_LEAF = AVLNode(key=None, value=None)
 """
 A class implementing an AVL tree.
 """
-
-
-
-
 class AVLTree(object):
 
 	"""
@@ -162,6 +157,7 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def finger_insert(self, key, val):
+		# TODO: implement
 		return None, -1, -1
 
 
@@ -171,6 +167,7 @@ class AVLTree(object):
 	@pre: node is a real pointer to a node in self
 	"""
 	def delete(self, node):
+		# TODO: implement
 		return
 
 
@@ -369,7 +366,7 @@ def update_height(node):
 	node.height = 1 + max(node.left.height, node.right.height)
 
 
-#cheks what rotation is needed and calls the appropriate function finally returns the new root of the subtree
+#cheks what rotation is needed (should handle all cases possible) and calls the appropriate function finally returns the new root of the subtree
 def rebalance(curr):
 	#TODO: implement rebalance
 	return curr
@@ -383,19 +380,11 @@ def rotate_right(node):
 	return
 
 
-
 """
-search the key from node subtree. used in search and search finger and insert to reduce duplicate code
-
-	@type node: AVLNode
-	@param node: the node to start the search from
-	@param key: key of item that is to be inserted to self
-	@rtype: (AVLNode,int,AVLNode)
-	@returns: a 3-tuple (node,edges,parent) where node is the searched node,
-	edges is the number of edges on the path between the starting node and new node before rebalancing,
+	@returns: a 3-tuple (node,edges,parent) where node is the searched node or none if not found,
+	edges is the number of edges on the path between the starting node and new node ,
 	parent is the parent of the searched node. used in insert
 	"""
-#
 def search_from(node, key):
 	if not node or not node.is_real_node():
 		return None, 0
