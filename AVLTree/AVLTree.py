@@ -7,9 +7,6 @@
 
 
 """A class represnting a node in an AVL tree"""
-from os.path import join
-from unittest.mock import right
-
 
 class AVLNode(object):
 	"""Constructor, you are allowed to add more fields. 
@@ -391,13 +388,65 @@ def _rebalance(node):
 	return node
 # rotates and returns the new root of the subtree, must ensure all is connected properly
 def _rotate_left(node):
+
 	#TODO: implement rotate_left
 	return
 # rotates and returns the new root of the subtree, must ensure all is connected properly
-def _rotate_right(node):
-	#TODO: implement rotate_right
+
+def is_right_child(node):
+	#TODO: implement is_right_child
 	return
 
+def _rotate_right(self, node):
+	subtree = node.left
+	parent = node.parent
+
+	if subtree.right.is_real_node():
+		subtree_child = subtree.right
+		node.left = subtree_child
+		subtree_child.parent = node
+		node.height = max(node.right.height, node.left.height) +1
+	else:
+		node.right = None
+		node.height = node.left.height + 1
+
+	subtree.right = node
+	node.parent = subtree
+	subtree.parent = parent
+
+
+	if node.parent == None:
+		return subtree
+	elif node.parent.left == node:
+		node.parent.left = subtree
+	else:
+		node.parent.right = subtree
+
+	return subtree
+
+def rotate_left(node):
+	subtree = node.right
+	parent = node.parent
+	if subtree.left.is_real_node():
+		subtree_child = subtree.left
+		node.right = subtree_child
+		subtree_child.parent = node
+		node.height = max(node.left.height, node.right.height) + 1
+	else:
+		node.right = None
+		node.height = node.left.height + 1
+
+	subtree.left = node
+	node.parent = subtree
+	subtree.parent = parent
+
+	if node.parent is None:
+		return subtree
+	elif node.parent.left == node:
+		node.parent.left = subtree
+	else:
+		node.parent.right = subtree
+	return subtree
 
 """
 	@returns: a 3-tuple (node,edges,parent) where node is the searched node or none if not found,
