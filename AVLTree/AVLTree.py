@@ -7,6 +7,9 @@
 
 
 """A class represnting a node in an AVL tree"""
+from os.path import join
+from unittest.mock import right
+
 
 class AVLNode(object):
 	"""Constructor, you are allowed to add more fields. 
@@ -23,7 +26,7 @@ class AVLNode(object):
 		self.right = right
 		self.parent = parent
 		self.height = 0 if key is not None else -1
-		
+
 
 	"""returns whether self is not a virtual node 
 
@@ -41,6 +44,9 @@ EXTERNAL_LEAF = AVLNode(key=None, value=None)
 """
 A class implementing an AVL tree.
 """
+
+
+
 
 class AVLTree(object):
 
@@ -110,6 +116,9 @@ class AVLTree(object):
 		else:
 			parent.left = new_node
 		self.size += 1
+		# update max if needed
+		if key > self.max.key:
+			self.max = new_node
 
 		# case A: parent is not a leaf - valid AVL tree
 		if parent.height == 1:
@@ -122,15 +131,19 @@ class AVLTree(object):
 		bf = balance_factor(curr)# must be 1 or -1 the first time
 		while bf==1 or bf==-1: # if bf==0 we are done (since curr is for sure grater than the unchanged child but bf=0 -> childs same height less than parent)
 			# case 1 - promote
-			promote_height(curr)
+			update_height(curr)
 			promotes += 1
 			curr = curr.parent
 			bf = balance_factor(curr) # notice if curr is none bf will be 0
 
-
 		# case 2 - rotate if needed once
 		if bf >1 or bf<-1:
-				rebalance(curr)
+			rebalance(curr)
+
+		# check if root has changed due to rotations. actually will run max 2 times
+		while self.root.parent is not None:
+			self.root = self.root.parent
+
 		return new_node, edges, promotes
 
 
@@ -158,9 +171,9 @@ class AVLTree(object):
 	@pre: node is a real pointer to a node in self
 	"""
 	def delete(self, node):
-		return	
+		return
 
-	
+
 	"""joins self with item and another AVLTree
 
 	@type tree2: AVLTree 
@@ -172,8 +185,82 @@ class AVLTree(object):
 	@pre: all keys in self are smaller than key and all keys in tree2 are larger than key,
 	or the opposite way
 	"""
+
 	def join(self, tree2, key, val):
+		# determine which tree is of greater keys
+		right_tree = self if self.max_node().key > key else tree2
+		left_tree = self if self.max_node().key < key else tree2
+
+		if left_tree.root.height > right_tree.root.height + 1:
+			return self._join_with_bigger_subtree(
+				bigger_tree=left_tree,
+				smaller_tree=right_tree,
+				key=key,
+				val=val,
+				is_left_bigger=True
+			)
+		if right_tree.root.height > left_tree.root.height + 1:
+			return self._join_with_bigger_subtree(
+				bigger_tree=right_tree,
+				smaller_tree=left_tree,
+				key=key,
+				val=val,
+				is_left_bigger=False
+			)
+
+		# if trees differ by at most 1 in height
+		new_root = AVLNode(key, val, left=left_tree.root, right=right_tree.root)
+		left_tree.root.parent = new_root
+		right_tree.root.parent = new_root
+		self.root = new_root
+		self.size += tree2.size + 1
+		self.max = right_tree.max
 		return
+
+	def _join_with_bigger_subtree(self, bigger_tree, smaller_tree, key, val, is_left_bigger):
+		"""Helper method to join trees when one subtree is significantly bigger"""
+		# go down in bigger until we find a node with height of smaller.root.height
+		curr = bigger_tree.root
+		while curr.height > smaller_tree.root.height:
+			curr = curr.right if is_left_bigger else curr.left
+
+		# connect and cut what's needed
+		if is_left_bigger:
+			x_node = AVLNode(key, val, parent=curr.parent, left=curr, right=smaller_tree.root)
+			curr.parent.right = x_node
+		else:
+			x_node = AVLNode(key, val, parent=curr.parent, left=smaller_tree.root, right=curr)
+			curr.parent.left = x_node
+
+		curr.parent = x_node
+		smaller_tree.root.parent = x_node
+
+		# rebalance from x_node to root
+		update_height(x_node)
+		curr = x_node.parent
+		bf = balance_factor(curr)
+
+		# rebalancing logic
+		while bf != 0:
+			if bf in [-1, 1]:  # case 1 - promote
+				update_height(curr)
+				curr = curr.parent
+				bf = balance_factor(curr)
+			else:
+				curr = rebalance(curr)
+				curr = curr.parent
+				bf = balance_factor(curr)
+
+		# check if root has changed due to rotations, max 2 iterations
+		while bigger_tree.root.parent is not None:
+			bigger_tree.root = bigger_tree.root.parent
+
+		# The right tree is the smaller tree if is_left_bigger is True, otherwise it's the bigger tree
+		self.max = smaller_tree.max if is_left_bigger else bigger_tree.max
+		self.root = bigger_tree.root
+		self.size = bigger_tree.size + smaller_tree.size + 1
+		return
+
 	#  בפונקציה ספליטה השתמשתי בפונקציה הזו גם עבור מקרה זבו אחד מהעצים הוא ריק, אז או לטפל בזה כאן או לטפל בזה במתודה split
 	"""splits the dictionary at a given node
 
@@ -276,15 +363,25 @@ def balance_factor(node):
 		return 0
 	return node.left.height - node.right.height
 
-def promote_height(node):
+def update_height(node):
 	if not node or not node.is_real_node():
 		return
 	node.height = 1 + max(node.left.height, node.right.height)
 
+
+#cheks what rotation is needed and calls the appropriate function finally returns the new root of the subtree
 def rebalance(curr):
+	#TODO: implement rebalance
+	return curr
+# rotates and returns the new root of the subtree
+def rotate_left(node):
+	#TODO: implement rotate_left
+	return
+# rotates and returns the new root of the subtree
+def rotate_right(node):
+	#TODO: implement rotate_right
+	return
 
-
-	pass
 
 
 """
@@ -313,3 +410,4 @@ def search_from(node, key):
 			curr = curr.left
 		edges += 1
 	return None, edges, curr.parent
+
