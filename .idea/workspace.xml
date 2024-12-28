@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82d91d4e-5bec-43c3-910e-45d9c33290e6" name="Changes" comment="&quot;insert_position&quot;">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AVLTree/AVLTree.py" beforeDir="false" afterPath="$PROJECT_DIR$/AVLTree/AVLTree.py" afterDir="false" />
-    </list>
+    <list default="true" id="82d91d4e-5bec-43c3-910e-45d9c33290e6" name="Changes" comment="&quot;insert_position&quot;" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -129,6 +126,7 @@
       <workItem from="1734795868483" duration="1225000" />
       <workItem from="1735243827997" duration="22478000" />
       <workItem from="1735310467110" duration="4863000" />
+      <workItem from="1735392044503" duration="129000" />
     </task>
     <task id="LOCAL-00001" summary="&quot;test&quot;">
       <option name="closed" value="true" />
@@ -202,7 +200,23 @@
       <option name="project" value="LOCAL" />
       <updated>1735314727403</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="&quot;insert_position&quot;">
+      <option name="closed" value="true" />
+      <created>1735392099920</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1735392099920</updated>
+    </task>
+    <task id="LOCAL-00011" summary="&quot;insert_position&quot;">
+      <option name="closed" value="true" />
+      <created>1735392169568</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1735392169568</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -250,6 +264,7 @@
     <MESSAGE value="&quot;test&quot;" />
     <MESSAGE value="&quot;The last four&quot;" />
     <MESSAGE value=" &quot;Correction of the last four according to the self&quot;" />
+    <MESSAGE value="&quot;&quot;" />
     <MESSAGE value="&quot;insert_position&quot;" />
     <option name="LAST_COMMIT_MESSAGE" value="&quot;insert_position&quot;" />
   </component>
