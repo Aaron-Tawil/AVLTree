@@ -7,6 +7,9 @@
 
 
 """A class represnting a node in an AVL tree"""
+from os.path import join
+from unittest.mock import right
+
 
 class AVLNode(object):
 	"""Constructor, you are allowed to add more fields. 
@@ -23,7 +26,7 @@ class AVLNode(object):
 		self.right = right
 		self.parent = parent
 		self.height = 0 if key is not None else -1
-		
+
 
 	"""returns whether self is not a virtual node 
 
@@ -33,7 +36,6 @@ class AVLNode(object):
 	def is_real_node(self):
 		return self.key is not None
 
-
 # Define the external leaf as singleton object (all external will point to this)
 EXTERNAL_LEAF = AVLNode(key=None, value=None)
 
@@ -41,7 +43,6 @@ EXTERNAL_LEAF = AVLNode(key=None, value=None)
 """
 A class implementing an AVL tree.
 """
-
 class AVLTree(object):
 
 	"""
@@ -61,18 +62,8 @@ class AVLTree(object):
 	and e is the number of edges on the path between the starting node and ending node+1.
 	"""
 	def search(self, key):
-		curr = self.root
-		edges = 1
-		while curr.is_real_node():
-			if curr.key == key:
-				return curr, edges
-			elif curr.key < key:
-				curr = curr.right
-			else:
-				curr = curr.left
-			edges += 1
-		return None, edges-1
-
+		x , e, _ = _search_from(self.root, key)
+		return x, e
 
 	"""searches for a node in the dictionary corresponding to the key, starting at the max
         
@@ -83,24 +74,22 @@ class AVLTree(object):
 	and e is the number of edges on the path between the starting node- the maximum of tree and ending node+1.
 	"""
 	def finger_search(self, key):
+		ancestor , edges_up = self.finger_track_up(key)
+		# go down until key is found
+		node , edges_down, _ = _search_from(ancestor, key)
+		edges = edges_down + edges_up
+		return node, edges
+
+
+	# helper that finds first common ancestor of max and key and  used in finger_search and finger_insert
+	def finger_track_up(self, key):
 		curr = self.max_node()
-		edges = 1
+		edges = 0
 		# go up until key is in subtree of current node
 		while curr.is_real_node() and curr.parent and (curr.parent.key >= key):
 			curr = curr.parent
 			edges += 1
-		# go down until key is found
-		while curr.is_real_node():
-			if curr.key == key:
-				return curr, edges
-			elif curr.key < key:
-				curr = curr.right
-			else:
-				curr = curr.left
-			edges += 1
-
-		return None, edges-1
-
+		return curr, edges
 
 	"""inserts a new node into the dictionary with corresponding key and value (starting at the root)
 
@@ -115,46 +104,53 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def insert(self, key, val):
-		parent, edges = self.insert_position(key)
+		parent, edges = self._insert_position(key)
+		new_node , promotes = self.insert_to_parent(parent, key, val)
+		return new_node, edges, promotes
+
+	#helper function to insert a new node to the parent and handle all logic and rebalancing. used in insert and insert_finger
+	def insert_to_parent(self, parent, key, val):
 		if parent is None:
 			self.root = AVLNode(key, val, parent=None, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
 			self.size += 1
 			self.max = self.root
-			return self.root, edges, 0
+			return self.root, 0
 		new_node = AVLNode(key, val, parent=parent, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
 		if key > parent.key:
 			parent.right = new_node
 		else:
 			parent.left = new_node
 		self.size += 1
+		# update max if needed
+		if key > self.max.key:
+			self.max = new_node
 
 		# case A: parent is not a leaf - valid AVL tree
 		if parent.height == 1:
-			return new_node, edges, 0
+			return new_node, 0
 		# case B: parent is a leaf
 		promotes = 0
-		promote_height(parent)
-		promotes += 1
 
-		# rebalancing logic
-		curr = parent
-		bf = balance_factor(curr)
-		while (bf==1 or bf==-1)  and curr.parent: # if bf==0 we are done
-			# case 1 - promote
-			promote_height(curr)
-			promotes += 1
-			curr = curr.parent
-			bf = balance_factor(curr)
-
-
-		# case 2 - rotate if needed once
-		if bf >1 or bf<-1:
-				rebalance(curr)
-		return new_node, edges, promotes
+		# TODO: check if we can avoid duplicate code, join has same logic rebalancing logic
+		curr = new_node
+		# case 1 - promote
+		while curr.height >= curr.parent.height:
+			bf = _balance_factor(curr.parent)
+			# notice bf ==0 is impossible here.
+			if bf in [-1, 1]:  # case 1 - only promote
+				_update_height(curr.parent)
+				promotes += 1
+				curr = curr.parent
+			else:
+				curr = _rebalance(curr.parent)
+				break # we break since we now in this case we finish
 
 
+		# check if root has changed due to rotations. in any rotation on the root it drops maximum by 1
+		if self.root.parent is not None:
+			self.root = self.root.parent
 
-
+		return new_node, promotes
 
 	"""inserts a new node into the dictionary with corresponding key and value, starting at the max
 
@@ -169,18 +165,22 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def finger_insert(self, key, val):
-		return None, -1, -1
-
+		ancestor,edges_up =  self.finger_track_up(key)
+		_, edges_down, parent = _search_from(ancestor, key)
+		edges = edges_down + edges_up
+		new_node, promotes = self.insert_to_parent(parent, key, val)
+		return new_node, edges, promotes
 
 	"""deletes node from the dictionary
-
+	
 	@type node: AVLNode
 	@pre: node is a real pointer to a node in self
 	"""
 	def delete(self, node):
-		return	
+		# TODO: implement
+		return
 
-	
+
 	"""joins self with item and another AVLTree
 
 	@type tree2: AVLTree 
@@ -192,8 +192,77 @@ class AVLTree(object):
 	@pre: all keys in self are smaller than key and all keys in tree2 are larger than key,
 	or the opposite way
 	"""
+
 	def join(self, tree2, key, val):
+		# determine which tree is of greater keys
+		right_tree = self if self.max_node().key > key else tree2
+		left_tree = self if self.max_node().key < key else tree2
+
+		if left_tree.root.height > right_tree.root.height + 1:
+			return self._join_with_bigger_subtree(
+				bigger_tree=left_tree,
+				smaller_tree=right_tree,
+				key=key,
+				val=val,
+				is_left_bigger=True
+			)
+		if right_tree.root.height > left_tree.root.height + 1:
+			return self._join_with_bigger_subtree(
+				bigger_tree=right_tree,
+				smaller_tree=left_tree,
+				key=key,
+				val=val,
+				is_left_bigger=False
+			)
+
+		# if trees differ by at most 1 in height
+		new_root = AVLNode(key, val, left=left_tree.root, right=right_tree.root)
+		left_tree.root.parent = new_root
+		right_tree.root.parent = new_root
+		self.root = new_root
+		self.size += tree2.size + 1
+		self.max = right_tree.max
 		return
+
+	def _join_with_bigger_subtree(self, bigger_tree, smaller_tree, key, val, is_left_bigger):
+		"""Helper method to join trees when one subtree is significantly bigger"""
+		# go down in bigger until we find a node with height of smaller.root.height
+		curr = bigger_tree.root
+		while curr.height > smaller_tree.root.height:
+			curr = curr.right if is_left_bigger else curr.left
+
+		# connect and cut what's needed
+		if is_left_bigger:
+			x_node = AVLNode(key, val, parent=curr.parent, left=curr, right=smaller_tree.root)
+			curr.parent.right = x_node
+		else:
+			x_node = AVLNode(key, val, parent=curr.parent, left=smaller_tree.root, right=curr)
+			curr.parent.left = x_node
+		curr.parent = x_node
+		smaller_tree.root.parent = x_node
+		_update_height(x_node)
+
+		# rebalance from x_node to root
+		curr = x_node
+		# rebalancing logic
+		while curr.height >= curr.parent.height :
+			bf = _balance_factor(curr.parent)
+			# notice bf ==0 is impossible here.
+			if bf in [-1, 1]:  # case 1 - only promote
+				_update_height(curr.parent)
+				curr = curr.parent
+			else: # case 2 - rotate
+				curr = _rebalance(curr.parent)
+
+		# check if root has changed due to rotations. in any rotation on the root it drops maximum by 1
+		if bigger_tree.root.parent is not None:
+			bigger_tree.root = bigger_tree.root.parent
+
+		self.max = smaller_tree.max if is_left_bigger else bigger_tree.max
+		self.root = bigger_tree.root
+		self.size = bigger_tree.size + smaller_tree.size + 1
+		return
+
 	#  בפונקציה ספליטה השתמשתי בפונקציה הזו גם עבור מקרה זבו אחד מהעצים הוא ריק, אז או לטפל בזה כאן או לטפל בזה במתודה split
 	"""splits the dictionary at a given node
 
@@ -281,20 +350,72 @@ class AVLTree(object):
 		return self.root
 
 
-	def insert_position(self, key):#להחזיר מספר קשתות וצומת האבא
-		curr = self.root
-		curr_parent = None
-		edges = 1
-		while curr.is_real_node():
-			if curr.key == key:
-				return curr_parent, edges
-			elif curr.key < key:
-				curr_parent = curr
-				curr = curr.right
-			else:
-				curr_parent = curr
-				curr = curr.left
-			edges += 1
-		return None, edges - 1
 
+
+	# returns the parent of the node that should be the parent of the new node
+	# and the number of edges on the path from root to the new node
+	def _insert_position(self, key):
+		_, edges, parent = _search_from(self.root, key)
+		return parent, edges
+
+
+
+
+# stand-alone helper functions
+def _balance_factor(node):
+	if not node or not node.is_real_node():
+		return 0
+	return node.left.height - node.right.height
+
+def _update_height(node):
+	if not node or not node.is_real_node():
+		return
+	node.height = 1 + max(node.left.height, node.right.height)
+
+
+#cheks what rotation is needed (should handle all cases possible) and calls the appropriate function finally returns the new root of the subtree
+def _rebalance(node):
+	bf = _balance_factor(node)
+	if bf > 1: # left heavy
+		if _balance_factor(node.left) >=0: # left left heavy
+			return _rotate_right(node)
+		else: # left right heavy
+			_rotate_left(node.left)
+			return _rotate_right(node)
+	elif bf < -1:# right heavy
+		if _balance_factor(node.right) <= 0: # right right heavy
+			return _rotate_left(node)
+		else: # right left heavy
+			_rotate_right(node.right)
+			return _rotate_left(node)
+	return node
+# rotates and returns the new root of the subtree, must ensure all is connected properly
+def _rotate_left(node):
+	#TODO: implement rotate_left
+	return
+# rotates and returns the new root of the subtree, must ensure all is connected properly
+def _rotate_right(node):
+	#TODO: implement rotate_right
+	return
+
+
+"""
+	@returns: a 3-tuple (node,edges,parent) where node is the searched node or none if not found,
+	edges is the number of edges on the path between the starting node and new node ,
+	parent is the parent of the searched node. used in insert
+	"""
+def _search_from(node, key):
+	if not node or not node.is_real_node():
+		return None, 0
+	curr = node
+	edges = 0
+	while curr.is_real_node():
+		if curr.key == key:
+			return curr , edges+1, curr.parent
+		elif curr.key < key:
+			curr = curr.right
+		else:
+			curr = curr.left
+		edges += 1
+	return None, edges, curr.parent
 
