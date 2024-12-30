@@ -174,6 +174,12 @@ class AVLTree(object):
 	@pre: node is a real pointer to a node in self
 	"""
 	def delete(self, node):
+		# if node == self.root:
+		# 	if and has_no_children(node):
+		# 	self.root = None
+		# 	return self
+		#
+		#
 		node_parent = node.parent
 		node_relation_to_parent = "right" if node.parent.right == node else "left"
 		# Get the predecessor's parent and grandparent
