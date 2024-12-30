@@ -174,8 +174,58 @@ class AVLTree(object):
 	@pre: node is a real pointer to a node in self
 	"""
 	def delete(self, node):
-		# TODO: implement
-		return
+		# if node == self.root:
+		# 	if and has_no_children(node):
+		# 	self.root = None
+		# 	return self
+		#
+		#
+		# Save the parent and the relation of the node to its parent (left or right child)
+		node_parent = node.parent
+		node_relation_to_parent = "right" if node.parent.right == node else "left"
+
+		# Get the predecessor's parent and grandparent
+		predecessor = find_subtree_predecessor(node)
+		predecessor_parent = predecessor.parent
+		predecessor_grandparent = predecessor_parent.parent if predecessor_parent is not None else None
+
+		# Transfer the left and right children of the node to the predecessor
+		predecessor.left = node.left
+		predecessor.right = node.right
+		predecessor.height = node.height
+		predecessor.parent =node_parent
+
+		# Update the parent's link to the predecessor
+		if node_relation_to_parent == "right":
+			node.parent.right = predecessor
+		else:
+			node.parent.left = predecessor
+
+		# Update the height of the predecessor's parent
+		predecessor.parent.height = max(predecessor.parent.right.height, node.parent.left.height) + 1
+
+		# Rebalance the tree from the predecessor's grandparent, if it exists
+		if predecessor_grandparent is not None:
+			if predecessor_grandparent.right.height == predecessor_grandparent.left.height:
+				curr = predecessor_grandparent
+				while curr is not None:
+					curr.height = max(curr.right.height, curr.left.height) +1
+					curr = curr.parent
+			else:
+				curr = predecessor_grandparent
+				while  abs(curr.left.height - curr.right.height) > 1:
+					curr = _rebalance(curr)
+				while curr is not None:
+					curr.height = max(curr.right.height, curr.left.height) +1
+					curr = curr.parent
+		else:
+			# If there is no grandparent, update the height for the predecessor's parent
+			curr = predecessor_parent
+			while curr is not None:
+				curr.height = max(curr.right.height, curr.left.height) + 1
+				curr = curr.parent
+
+		return self
 
 
 	"""joins self with item and another AVLTree
@@ -468,3 +518,29 @@ def _search_from(node, key):
 		edges += 1
 	return None, edges, curr.parent
 
+#    Checks if a node in a tree has exactly one child (either left or right).
+def has_single_child(node):
+	if node.left.is_real_node() and not node.right.is_real_node() or\
+			not node.left.is_real_node() and node.right.is_real_node():
+		return True
+	return False
+
+def find_subtree_predecessor(node):
+	# If the node has a left child, the predecessor is the maximum node in the left subtree.
+	if has_no_children(node):
+		return node
+	elif node.left.is_real_node():
+		curr = node.left
+		while curr.right.is_real_node():
+			curr = curr.right
+			return curr
+
+	# If there is no left child, there is no predecessor (None)
+	return None
+
+def update_heights_upward(node):
+	return None
+
+
+def has_no_children(node):
+	return node.left is None and node.right is None
