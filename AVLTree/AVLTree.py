@@ -174,51 +174,103 @@ class AVLTree(object):
 	@pre: node is a real pointer to a node in self
 	"""
 	def delete(self, node):
+		successor_ = find_successor_in_right_subtree(node)
+		successor_parent = successor_.parent
+		successor_.parent = node.parent
+		successor_.left = node.left
+		successor_.right = node.right
+		successor_.height = node.height
+		parent  = node.parent
+		if isRightChild(node):
+			parent.right = successor_
+		elif isLeftChild(node):
+			parent.left = successor_
+		else:
+			self.root = successor_
+
+		if isLeafNode(node):
+			if isRightChild(node):
+				parent.right = None
+				balance_to_root(node.parent)
+			elif isLeftChild(node):
+				parent.left = None
+				balance_to_root(node.parent)
+			else:
+				balance_to_root(node)
+		elif has_only_one_child(node):
+			if node.left.is_real_node():
+				if node.parent.left == node:
+					parent.left = node.left
+					node.left.parent = parent
+				else:
+					parent.right = node.left
+					node.left.parent = parent
+			else:
+				if parent.left == node:
+					parent.left = node.right
+					node.right.parent = parent
+				else:
+					parent.right = node.right
+					node.right.parent = parent
+			balance_to_root(node.parent)
+			return self
+
+
+
+
 		# if node == self.root:
 		# 	if and has_no_children(node):
 		# 	self.root = None
 		# 	return self
 		#
 		#
-		node_parent = node.parent
-		node_relation_to_parent = "right" if node.parent.right == node else "left"
-		# Get the predecessor's parent and grandparent
-		predecessor = find_subtree_predecessor(node)
-		predecessor_parent = predecessor.parent
-		predecessor_grandparent = predecessor_parent.parent if predecessor_parent is not None else None
-		# Transfer the left and right children of the node to the predecessor
-		predecessor.left = node.left
-		predecessor.right = node.right
-		predecessor.height = node.height
-		predecessor.parent = node_parent
-		# Update the parent's link to the predecessor
-		if node_relation_to_parent == "right":
-			node.parent.right = predecessor
-		else:
-			node.parent.left = predecessor
-		# Update the height of the predecessor's parent
-		predecessor.parent.height = max(predecessor.parent.right.height, node.parent.left.height) + 1
-		# Rebalance the tree from the predecessor's grandparent, if it exists
-		if predecessor_grandparent is not None:
-			if predecessor_grandparent.right.height == predecessor_grandparent.left.height:
-				curr = predecessor_grandparent
-				while curr is not None:
-					curr.height = max(curr.right.height, curr.left.height) + 1
-					curr = curr.parent
-			else:
-				curr = predecessor_grandparent
-				while abs(curr.left.height - curr.right.height) > 1:
-					curr = _rebalance(curr)
-				while curr is not None:
-					curr.height = max(curr.right.height, curr.left.height) + 1
-					curr = curr.parent
-		else:
-			# If there is no grandparent, update the height for the predecessor's parent
-			curr = predecessor_parent
-			while curr is not None:
-				curr.height = max(curr.right.height, curr.left.height) + 1
-				curr = curr.parent
-		return self
+		# if node == self.root:
+		#
+		# if node.parent ==
+		# node_parent = node.parent
+		# node_relation_to_parent = "right" if node.parent.right == node else "left"
+		#
+		# # Get the predecessor's parent and grandparent
+		# predecessor = find_subtree_predecessor(node)
+		# predecessor_parent = predecessor.parent
+		# predecessor_grandparent = predecessor_parent.parent if predecessor_parent is not None else None
+
+		# # Transfer the left and right children of the node to the predecessor
+		# predecessor.left = node.left
+		# predecessor.right = node.right
+		# predecessor.height = node.height
+		# predecessor.parent = node_parent
+		#
+		# # Update the parent's link to the predecessor
+		# if node_relation_to_parent == "right":
+		# 	node.parent.right = predecessor
+		# else:
+		# 	node.parent.left = predecessor
+		#
+		# # Update the height of the predecessor's parent
+		# predecessor.parent.height = max(predecessor.parent.right.height, node.parent.left.height) + 1
+		#
+		# # Rebalance the tree from the predecessor's grandparent, if it exists
+		# if predecessor_grandparent is not None:
+		# 	if predecessor_grandparent.right.height == predecessor_grandparent.left.height:
+		# 		curr = predecessor_grandparent
+		# 		while curr is not None:
+		# 			curr.height = max(curr.right.height, curr.left.height) + 1
+		# 			curr = curr.parent
+		# 	else:
+		# 		curr = predecessor_grandparent
+		# 		while abs(curr.left.height - curr.right.height) > 1:
+		# 			curr = _rebalance(curr)
+		# 		while curr is not None:
+		# 			curr.height = max(curr.right.height, curr.left.height) + 1
+		# 			curr = curr.parent
+		# else:
+		# 	# If there is no grandparent, update the height for the predecessor's parent
+		# 	curr = predecessor_parent
+		# 	while curr is not None:
+		# 		curr.height = max(curr.right.height, curr.left.height) + 1
+		# 		curr = curr.parent
+		# return self
 
 	"""joins self with item and another AVLTree
 
@@ -532,3 +584,41 @@ def update_heights_upward(node):
 	return None
 def has_no_children(node):
 	return node.left is None and node.right is None
+
+def isLeafNode(node):
+	return node.left is None and node.right is None
+
+def isRightChild(node):
+	return node.parent.right == node
+def isLeftChild(node):
+	return node.parent.left == node
+def balance_to_root(node):
+	while node:  # Continue until reaching the root
+		_update_height(node)  # Update the height of the current node
+		node = _rebalance(node)  # Perform rebalancing if needed
+		node = node.parent  # Move up to the parent node
+
+def has_only_one_child(node):
+	if not node:
+		return False  # A null node has no children
+	left_child_exists = node.left is not None
+	right_child_exists = node.right is not None
+	return (left_child_exists and not right_child_exists) or (right_child_exists and not left_child_exists)
+
+
+def find_successor_in_right_subtree(node):
+	if not node:  # If the node is None
+		return None
+
+	# If there is no right subtree, return the node itself
+	if not node.right:
+		return node
+
+	# If there is a right subtree, move to it
+	right_subtree = node.right
+
+	# Find the leftmost (smallest) node in the right subtree
+	while right_subtree.left:
+		right_subtree = right_subtree.left
+
+	return right_subtree
