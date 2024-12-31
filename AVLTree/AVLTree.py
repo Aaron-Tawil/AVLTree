@@ -184,8 +184,6 @@ class AVLTree(object):
 	"""
 	def delete(self, node):
 		# TODO: implement
-		#for testing
-		print("enter delete")
 		return
 
 
@@ -297,7 +295,6 @@ class AVLTree(object):
 		self.size = bigger_tree.size + smaller_tree.size + 1
 		return
 
-	#  בפונקציה ספליטה השתמשתי בפונקציה הזו גם עבור מקרה זבו אחד מהעצים הוא ריק, אז או לטפל בזה כאן או לטפל בזה במתודה split
 	"""splits the dictionary at a given node
 
 	@type node: AVLNode
@@ -321,11 +318,6 @@ class AVLTree(object):
 			larger_than_node.root = node.right
 			node.right.parent = None
 
-
-		# Disconnect the given node from its left and right children
-
-
-
 		# Traverse upwards from the given node to update the subtrees structure
 		curr_parent = node.parent
 		curr_child = node
@@ -334,26 +326,21 @@ class AVLTree(object):
 			if curr_child == curr_parent.right:# If the current node is in the right subtree of its parent
 				temp_tree.root = curr_parent.left
 				curr_parent.left.parent = None
-				# parent.left = None
 				# Join the parent's left subtree with the smaller subtree
 				smaller_than_node.join(temp_tree, curr_parent.key, curr_parent.value)
 			else: # If the current node is in the left subtree of its parent
 				temp_tree.root = curr_parent.right
 				curr_parent.right.parent = None
-				# parent.right = None
 				# Join the parent's right subtree with the larger subtree
 				larger_than_node.join(temp_tree, curr_parent.key, curr_parent.value)
 			# Move up to the parent node for the next iteration
 			curr_child = curr_parent
 			curr_parent = curr_parent.parent
 
-
 		smaller_than_node.max = smaller_than_node._find_max()
 		larger_than_node.max = larger_than_node._find_max()
 		# Return the two resulting subtrees
 		return smaller_than_node, larger_than_node
-
-
 
 	"""returns an s array representing dictionary 
 
@@ -398,8 +385,6 @@ class AVLTree(object):
 		return self.root
 
 
-
-
 	# returns the parent of the node that should be the parent of the new node
 	# and the number of edges on the path from root to the new node
 	def _insert_position(self, key):
@@ -417,11 +402,13 @@ class AVLTree(object):
 
 
 # stand-alone helper functions
+# calculates the balance factor of the node
 def _balance_factor(node):
 	if not node or not node.is_real_node():
 		return 0
 	return node.left.height - node.right.height
 
+# calculates the height of the node based on its children
 def _update_height(node):
 	if not node or not node.is_real_node():
 		return
@@ -507,7 +494,7 @@ def _rotate_right(z):
 
 # @returns: a 3-tuple (node,edges,parent) where node is the searched node or none if not found,
 # edges is the number of edges on the path between the starting node and new node ,
-# parent is the parent of the searched node. used in insert
+# parent is the parent of the searched node. used in insert, and insert finger
 def _search_from(node, key):
 	if node is None or not node.is_real_node():
 		return None, 0, None
