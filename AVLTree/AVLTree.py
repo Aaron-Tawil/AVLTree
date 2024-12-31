@@ -7,6 +7,7 @@
 
 
 """A class represnting a node in an AVL tree"""
+
 class AVLNode(object):
 	"""Constructor, you are allowed to add more fields. 
 	
@@ -22,8 +23,6 @@ class AVLNode(object):
 		self.right = right
 		self.parent = parent
 		self.height = 0 if key is not None else -1
-		#just for testing TODO: remove
-		self.size = 0
 
 
 	"""returns whether self is not a virtual node 
@@ -72,9 +71,7 @@ class AVLTree(object):
 	and e is the number of edges on the path between the starting node- the maximum of tree and ending node+1.
 	"""
 	def finger_search(self, key):
-		if self.max is None:
-			return None, 0
-		ancestor , edges_up = self._finger_track_up(key)
+		ancestor , edges_up = self.finger_track_up(key)
 		# go down until key is found
 		node , edges_down, _ = _search_from(ancestor, key)
 		edges = edges_down + edges_up
@@ -82,11 +79,11 @@ class AVLTree(object):
 
 
 	# helper that finds first common ancestor of max and key and  used in finger_search and finger_insert
-	def _finger_track_up(self, key):
+	def finger_track_up(self, key):
 		curr = self.max_node()
 		edges = 0
 		# go up until key is in subtree of current node
-		while curr.parent is not None and (curr.parent.key >= key):
+		while curr.is_real_node() and curr.parent and (curr.parent.key >= key):
 			curr = curr.parent
 			edges += 1
 		return curr, edges
@@ -104,13 +101,12 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def insert(self, key, val):
-		#for testing
 		parent, edges = self._insert_position(key)
-		new_node , promotes = self._insert_to_parent(parent, key, val)
+		new_node , promotes = self.insert_to_parent(parent, key, val)
 		return new_node, edges, promotes
 
 	#helper function to insert a new node to the parent and handle all logic and rebalancing. used in insert and insert_finger
-	def _insert_to_parent(self, parent, key, val):
+	def insert_to_parent(self, parent, key, val):
 		if parent is None:
 			self.root = AVLNode(key, val, parent=None, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
 			self.size += 1
@@ -132,10 +128,10 @@ class AVLTree(object):
 		# case B: parent is a leaf
 		promotes = 0
 
-		# TODO: check if we can avoid duplicate code, join has same rebalancing logic
+		# TODO: check if we can avoid duplicate code, join has same logic rebalancing logic
 		curr = new_node
 		# case 1 - promote
-		while curr.parent is not None and curr.height >= curr.parent.height:
+		while curr.height >= curr.parent.height:
 			bf = _balance_factor(curr.parent)
 			# notice bf ==0 is impossible here.
 			if bf in [-1, 1]:  # case 1 - only promote
@@ -166,15 +162,10 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def finger_insert(self, key, val):
-		if self.max is None:
-			self.root = AVLNode(key, val, parent=None, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
-			self.size += 1
-			self.max = self.root
-			return self.root, 0, 0
-		ancestor,edges_up =  self._finger_track_up(key)
+		ancestor,edges_up =  self.finger_track_up(key)
 		_, edges_down, parent = _search_from(ancestor, key)
 		edges = edges_down + edges_up
-		new_node, promotes = self._insert_to_parent(parent, key, val)
+		new_node, promotes = self.insert_to_parent(parent, key, val)
 		return new_node, edges, promotes
 
 	"""deletes node from the dictionary
@@ -183,9 +174,104 @@ class AVLTree(object):
 	@pre: node is a real pointer to a node in self
 	"""
 	def delete(self, node):
-		# TODO: implement
-		return
+		successor_ = find_successor_in_right_subtree(node)
+		successor_parent = successor_.parent
+		successor_.parent = node.parent
+		successor_.left = node.left
+		successor_.right = node.right
+		successor_.height = node.height
+		parent  = node.parent
+		if isRightChild(node):
+			parent.right = successor_
+		elif isLeftChild(node):
+			parent.left = successor_
+		else:
+			self.root = successor_
 
+
+		if isLeafNode(node):
+			if isRightChild(node):
+				parent.right = None
+				balance_to_root(node.parent)
+			elif isLeftChild(node):
+				parent.left = None
+				balance_to_root(node.parent)
+			else:
+				balance_to_root(node)
+		elif has_only_one_child(node):
+			if node.left.is_real_node():
+				if node.parent.left == node:
+					parent.left = node.left
+					node.left.parent = parent
+				else:
+					parent.right = node.left
+					node.left.parent = parent
+			else:
+				if parent.left == node:
+					parent.left = node.right
+					node.right.parent = parent
+				else:
+					parent.right = node.right
+					node.right.parent = parent
+			balance_to_root(node.parent)
+			return self
+
+
+
+
+		# if node == self.root:
+		# 	if and has_no_children(node):
+		# 	self.root = None
+		# 	return self
+		#
+		#
+		# if node == self.root:
+		#
+		# if node.parent ==
+		# node_parent = node.parent
+		# node_relation_to_parent = "right" if node.parent.right == node else "left"
+		#
+		# # Get the predecessor's parent and grandparent
+		# predecessor = find_subtree_predecessor(node)
+		# predecessor_parent = predecessor.parent
+		# predecessor_grandparent = predecessor_parent.parent if predecessor_parent is not None else None
+
+		# # Transfer the left and right children of the node to the predecessor
+		# predecessor.left = node.left
+		# predecessor.right = node.right
+		# predecessor.height = node.height
+		# predecessor.parent = node_parent
+		#
+		# # Update the parent's link to the predecessor
+		# if node_relation_to_parent == "right":
+		# 	node.parent.right = predecessor
+		# else:
+		# 	node.parent.left = predecessor
+		#
+		# # Update the height of the predecessor's parent
+		# predecessor.parent.height = max(predecessor.parent.right.height, node.parent.left.height) + 1
+		#
+		# # Rebalance the tree from the predecessor's grandparent, if it exists
+		# if predecessor_grandparent is not None:
+		# 	if predecessor_grandparent.right.height == predecessor_grandparent.left.height:
+		# 		curr = predecessor_grandparent
+		# 		while curr is not None:
+		# 			curr.height = max(curr.right.height, curr.left.height) + 1
+		# 			curr = curr.parent
+		# 	else:
+		# 		curr = predecessor_grandparent
+		# 		while abs(curr.left.height - curr.right.height) > 1:
+		# 			curr = _rebalance(curr)
+		# 		while curr is not None:
+		# 			curr.height = max(curr.right.height, curr.left.height) + 1
+		# 			curr = curr.parent
+		# else:
+		# 	# If there is no grandparent, update the height for the predecessor's parent
+		# 	curr = predecessor_parent
+		# 	while curr is not None:
+		# 		curr.height = max(curr.right.height, curr.left.height) + 1
+		# 		curr = curr.parent
+		# return self
 
 	"""joins self with item and another AVLTree
 
@@ -333,6 +419,7 @@ class AVLTree(object):
 				curr_parent.right.parent = None
 				# Join the parent's right subtree with the larger subtree
 				larger_than_node.join(temp_tree, curr_parent.key, curr_parent.value)
+
 			# Move up to the parent node for the next iteration
 			curr_child = curr_parent
 			curr_parent = curr_parent.parent
@@ -348,16 +435,14 @@ class AVLTree(object):
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
 	"""
 	def avl_to_array(self):
-		result = []
-		def inorder_traversal(node):
-			if not node or not node.is_real_node():
-				return
-			inorder_traversal(node.left)
-			result.append((node.key, node.value))
-			inorder_traversal(node.right)
+		curr_node = self.root
+		if not curr_node.left and not curr_node.right:
+			return [(curr_node.key, curr_node.value)]
 
-		inorder_traversal(self.root)
-		return result
+		left_subtree = curr_node.left.avl_to_array() if curr_node.left else []
+		right_subtree = curr_node.right.avl_to_array() if curr_node.right else []
+
+		return left_subtree + [(curr_node.key, curr_node.value)] + right_subtree
 
 	"""returns the node with the maximal key in the dictionary
 
@@ -431,85 +516,145 @@ def _rebalance(node):
 			_rotate_right(node.right)
 			return _rotate_left(node)
 	return node
-
 # rotates and returns the new root of the subtree, must ensure all is connected properly
-def _rotate_left(z):
-	#     z                              y
-	#    /  \                           / \
-	#   T1   y         Left Rotate     z   X
-	#       / \       ============>   / \
-	#      T2  X                    T1  T2
-	y = z.right
-	parent = z.parent
+def _rotate_left(node):
 
-	t2 = y.left
-	z.right = t2
-	t2.parent = z
-	_update_height(z)
-
-	y.left = z
-	z.parent = y
-	_update_height(y)
-
-	y.parent = parent
-
-	# update parent
-	if parent is None:
-		return y
-	elif parent.left == z:
-		parent.left = y
-	else:
-		parent.right = y
-	return y
-
+	#TODO: implement rotate_left
+	return
 # rotates and returns the new root of the subtree, must ensure all is connected properly
-def _rotate_right(z):
-	#       z                             y
-	#      / \                           / \
-	#     y   T3        Right Rotate    X   z
-	#    / \           ============>       / \
-	#   X   T2                           T2   T3
-	y = z.left
-	parent = z.parent
 
-	t2 = y.right
-	z.left = t2
-	t2.parent = z
-	_update_height(z)
+def is_right_child(node):
+	#TODO: implement is_right_child
+	return
 
-	y.right = z
-	z.parent = y
-	_update_height(y)
+def _rotate_right(self, node):
+	subtree = node.left
+	parent = node.parent
 
-	y.parent = parent
-
-	# update parent
-	if parent is None:
-		return y
-	elif parent.left == z:
-		parent.left = y
+	if subtree.right.is_real_node():
+		subtree_child = subtree.right
+		node.left = subtree_child
+		subtree_child.parent = node
+		node.height = max(node.right.height, node.left.height) +1
 	else:
-		parent.right = y
-	return y
+		node.right = None
+		node.height = node.left.height + 1
+
+	subtree.right = node
+	node.parent = subtree
+	subtree.parent = parent
+
+
+	if node.parent == None:
+		return subtree
+	elif node.parent.left == node:
+		node.parent.left = subtree
+	else:
+		node.parent.right = subtree
+
+	return subtree
+
+def rotate_left(node):
+	subtree = node.right
+	parent = node.parent
+	if subtree.left.is_real_node():
+		subtree_child = subtree.left
+		node.right = subtree_child
+		subtree_child.parent = node
+		node.height = max(node.left.height, node.right.height) + 1
+	else:
+		node.right = None
+		node.height = node.left.height + 1
+
+	subtree.left = node
+	node.parent = subtree
+	subtree.parent = parent
+
+	if node.parent is None:
+		return subtree
+	elif node.parent.left == node:
+		node.parent.left = subtree
+	else:
+		node.parent.right = subtree
+	return subtree
+
 
 # @returns: a 3-tuple (node,edges,parent) where node is the searched node or none if not found,
 # edges is the number of edges on the path between the starting node and new node ,
 # parent is the parent of the searched node. used in insert, and insert finger
+
 def _search_from(node, key):
-	if node is None or not node.is_real_node():
-		return None, 0, None
+	if not node or not node.is_real_node():
+		return None, 0
 	curr = node
 	edges = 0
-	parent = node
 	while curr.is_real_node():
 		if curr.key == key:
 			return curr , edges, curr.parent
 		elif curr.key < key:
-			parent = curr
 			curr = curr.right
 		else:
-			parent = curr
 			curr = curr.left
 		edges += 1
-	return None, edges, parent
+	return None, edges, curr.parent
 
+
+#    Checks if a node in a tree has exactly one child (either left or right).
+def has_single_child(node):
+	if node.left.is_real_node() and not node.right.is_real_node() or\
+			not node.left.is_real_node() and node.right.is_real_node():
+		return True
+	return False
+def find_subtree_predecessor(node):
+	# If the node has a left child, the predecessor is the maximum node in the left subtree.
+	if has_no_children(node):
+		return node
+	elif node.left.is_real_node():
+		curr = node.left
+		while curr.right.is_real_node():
+			curr = curr.right
+			return curr
+	# If there is no left child, there is no predecessor (None)
+	return None
+def update_heights_upward(node):
+	return None
+def has_no_children(node):
+	return node.left is None and node.right is None
+
+def isLeafNode(node):
+	return node.left is None and node.right is None
+
+def isRightChild(node):
+	return node.parent.right == node
+def isLeftChild(node):
+	return node.parent.left == node
+def balance_to_root(node):
+	while node:  # Continue until reaching the root
+		_update_height(node)  # Update the height of the current node
+		node = _rebalance(node)  # Perform rebalancing if needed
+		node = node.parent  # Move up to the parent node
+
+def has_only_one_child(node):
+	if not node:
+		return False  # A null node has no children
+	left_child_exists = node.left is not None
+	right_child_exists = node.right is not None
+	return (left_child_exists and not right_child_exists) or (right_child_exists and not left_child_exists)
+
+
+def find_successor_in_right_subtree(node):
+	if not node:  # If the node is None
+		return None
+
+	# If there is no right subtree, return the node itself
+	if not node.right:
+		return node
+
+	# If there is a right subtree, move to it
+	right_subtree = node.right
+
+	# Find the leftmost (smallest) node in the right subtree
+	while right_subtree.left:
+		right_subtree = right_subtree.left
+
+	return right_subtree
