@@ -511,14 +511,5 @@ def print_tree(root, indent="", pointer="Root: "):
             else:
                 print(indent + "    R--- None")
 
-tree = AVLTree()
-tree.insert(20, "")
-tree.insert(10, "")
-tree.insert(30, "")
-tree.insert(5, "")
-tree.insert(2, "")
-tree.insert(15, "")
-print_tree(tree)
-
 if __name__ == '__main__':
     run()
