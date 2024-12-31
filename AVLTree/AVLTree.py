@@ -119,7 +119,7 @@ class AVLTree(object):
 			parent.left = new_node
 		self.size += 1
 		# update max if needed
-		if key > self.max.key:
+		if self.max is not None and key > self.max.key:
 			self.max = new_node
 
 		# case A: parent is not a leaf - valid AVL tree
@@ -187,6 +187,7 @@ class AVLTree(object):
 			parent.left = successor_
 		else:
 			self.root = successor_
+
 
 		if isLeafNode(node):
 			if isRightChild(node):
@@ -285,9 +286,18 @@ class AVLTree(object):
 	"""
 
 	def join(self, tree2, key, val):
+
+		if tree2.root is None or not tree2.root.is_real_node():
+			self.insert(key, val)
+			return
+		if self.root is None or not self.root.is_real_node():
+			self.root = tree2.root
+			self.insert(key, val)
+			return
+
 		# determine which tree is of greater keys
-		right_tree = self if self.max_node().key > key else tree2
-		left_tree = self if self.max_node().key < key else tree2
+		right_tree = self if self.root.key > key else tree2
+		left_tree = self if self.root.key < key else tree2
 
 		if left_tree.root.height > right_tree.root.height + 1:
 			return self._join_with_bigger_subtree(
@@ -310,6 +320,7 @@ class AVLTree(object):
 		new_root = AVLNode(key, val, left=left_tree.root, right=right_tree.root)
 		left_tree.root.parent = new_root
 		right_tree.root.parent = new_root
+		_update_height(new_root)
 		self.root = new_root
 		self.size += tree2.size + 1
 		self.max = right_tree.max
@@ -319,24 +330,40 @@ class AVLTree(object):
 		"""Helper method to join trees when one subtree is significantly bigger"""
 		# go down in bigger until we find a node with height of smaller.root.height
 		curr = bigger_tree.root
+		external_stop_flag = False
 		while curr.height > smaller_tree.root.height:
-			curr = curr.right if is_left_bigger else curr.left
+			if (is_left_bigger and not curr.right.is_real_node()) or (not is_left_bigger and not curr.left.is_real_node()):
+				external_stop_flag = True
+				break
+			else:
+				curr = curr.right if is_left_bigger else curr.left
+
 
 		# connect and cut what's needed
 		if is_left_bigger:
-			x_node = AVLNode(key, val, parent=curr.parent, left=curr, right=smaller_tree.root)
-			curr.parent.right = x_node
+			if external_stop_flag:
+				x_node = AVLNode(key, val, parent=curr, left=EXTERNAL_LEAF, right=smaller_tree.root)
+				curr.right = x_node
+			else:
+				x_node = AVLNode(key, val, parent=curr.parent, left=curr, right=smaller_tree.root)
+				curr.parent.right = x_node
+				curr.parent = x_node
 		else:
-			x_node = AVLNode(key, val, parent=curr.parent, left=smaller_tree.root, right=curr)
-			curr.parent.left = x_node
-		curr.parent = x_node
+			if external_stop_flag:
+				x_node = AVLNode(key, val, parent=curr, left=smaller_tree.root, right=EXTERNAL_LEAF)
+				curr.left = x_node
+			else:
+				x_node = AVLNode(key, val, parent=curr.parent, left=smaller_tree.root, right=curr)
+				curr.parent.left = x_node
+				curr.parent = x_node
+
 		smaller_tree.root.parent = x_node
 		_update_height(x_node)
 
 		# rebalance from x_node to root
 		curr = x_node
 		# rebalancing logic
-		while curr.height >= curr.parent.height :
+		while curr.parent is not None and  curr.height >= curr.parent.height :
 			bf = _balance_factor(curr.parent)
 			# notice bf ==0 is impossible here.
 			if bf in [-1, 1]:  # case 1 - only promote
@@ -354,7 +381,6 @@ class AVLTree(object):
 		self.size = bigger_tree.size + smaller_tree.size + 1
 		return
 
-	#  בפונקציה ספליטה השתמשתי בפונקציה הזו גם עבור מקרה זבו אחד מהעצים הוא ריק, אז או לטפל בזה כאן או לטפל בזה במתודה split
 	"""splits the dictionary at a given node
 
 	@type node: AVLNode
@@ -365,40 +391,43 @@ class AVLTree(object):
 	dictionary smaller than node.key, and right is an AVLTree representing the keys in the 
 	dictionary larger than node.key.
 	"""
-
-	# TODO: Update this function to calculate size,root,max dynamically for each tree
 	def split(self, node):
 		# Initialize the subtrees based on the given node
-		larger_than_node = node.right # Subtree with nodes larger than the current node's key
-		smaller_than_node = node.left # Subtree with nodes smaller than the current node's key
-
-		# Disconnect the given node from its left and right children
-		node.left = None
-		node.right = None
+		larger_than_node = AVLTree() # Subtree with nodes larger than the current node's key
+		smaller_than_node = AVLTree() # Subtree with nodes smaller than the current node's key
+		if node is None or not node.is_real_node():
+			return smaller_than_node, larger_than_node
+		if node.left.is_real_node():
+			smaller_than_node.root = node.left
+			node.left.parent = None
+		if node.right.is_real_node():
+			larger_than_node.root = node.right
+			node.right.parent = None
 
 		# Traverse upwards from the given node to update the subtrees structure
-		currNode = node
-		while currNode.parent is not None:
-			parent = currNode.parent
-
-			if currNode.key > parent.key:# If the current node is in the right subtree of its parent
-				tempTree = parent.left
-				parent.left = None
+		curr_parent = node.parent
+		curr_child = node
+		while curr_parent is not None:
+			temp_tree = AVLTree()
+			if curr_child == curr_parent.right:# If the current node is in the right subtree of its parent
+				temp_tree.root = curr_parent.left
+				curr_parent.left.parent = None
 				# Join the parent's left subtree with the smaller subtree
-				smaller_than_node = tempTree.join(smaller_than_node, parent.key, parent.val)
+				smaller_than_node.join(temp_tree, curr_parent.key, curr_parent.value)
 			else: # If the current node is in the left subtree of its parent
-				tempTree = parent.right
-				parent.right = None
+				temp_tree.root = curr_parent.right
+				curr_parent.right.parent = None
 				# Join the parent's right subtree with the larger subtree
-				larger_than_node = larger_than_node.join(tempTree, currNode.key, currNode.val)
+				larger_than_node.join(temp_tree, curr_parent.key, curr_parent.value)
 
 			# Move up to the parent node for the next iteration
-			currNode = parent
+			curr_child = curr_parent
+			curr_parent = curr_parent.parent
 
+		smaller_than_node.max = smaller_than_node._find_max()
+		larger_than_node.max = larger_than_node._find_max()
 		# Return the two resulting subtrees
-		return larger_than_node, smaller_than_node
-
-
+		return smaller_than_node, larger_than_node
 
 	"""returns an s array representing dictionary 
 
@@ -441,23 +470,30 @@ class AVLTree(object):
 		return self.root
 
 
-
-
 	# returns the parent of the node that should be the parent of the new node
 	# and the number of edges on the path from root to the new node
 	def _insert_position(self, key):
 		_, edges, parent = _search_from(self.root, key)
 		return parent, edges
 
-
+	# returns the maximum node in the tree iterating in the right extreme of the tree. used in split
+	def _find_max(self):
+		if self.root is None:
+			return None
+		curr = self.root
+		while curr.right.is_real_node():
+			curr = curr.right
+		return curr
 
 
 # stand-alone helper functions
+# calculates the balance factor of the node
 def _balance_factor(node):
 	if not node or not node.is_real_node():
 		return 0
 	return node.left.height - node.right.height
 
+# calculates the height of the node based on its children
 def _update_height(node):
 	if not node or not node.is_real_node():
 		return
@@ -542,11 +578,11 @@ def rotate_left(node):
 		node.parent.right = subtree
 	return subtree
 
-"""
-	@returns: a 3-tuple (node,edges,parent) where node is the searched node or none if not found,
-	edges is the number of edges on the path between the starting node and new node ,
-	parent is the parent of the searched node. used in insert
-	"""
+
+# @returns: a 3-tuple (node,edges,parent) where node is the searched node or none if not found,
+# edges is the number of edges on the path between the starting node and new node ,
+# parent is the parent of the searched node. used in insert, and insert finger
+
 def _search_from(node, key):
 	if not node or not node.is_real_node():
 		return None, 0
@@ -554,7 +590,7 @@ def _search_from(node, key):
 	edges = 0
 	while curr.is_real_node():
 		if curr.key == key:
-			return curr , edges+1, curr.parent
+			return curr , edges, curr.parent
 		elif curr.key < key:
 			curr = curr.right
 		else:
