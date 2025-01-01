@@ -7,6 +7,7 @@
 
 
 """A class represnting a node in an AVL tree"""
+
 class AVLNode(object):
 	"""Constructor, you are allowed to add more fields. 
 	
@@ -104,7 +105,6 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def insert(self, key, val):
-		#for testing
 		parent, edges = self._insert_position(key)
 		new_node , promotes = self._insert_to_parent(parent, key, val)
 		return new_node, edges, promotes
@@ -135,7 +135,7 @@ class AVLTree(object):
 		# TODO: check if we can avoid duplicate code, join has same rebalancing logic
 		curr = new_node
 		# case 1 - promote
-		while curr.parent is not None and curr.height >= curr.parent.height:
+		while curr.parent  and curr.height >= curr.parent.height:
 			bf = _balance_factor(curr.parent)
 			# notice bf ==0 is impossible here.
 			if bf in [-1, 1]:  # case 1 - only promote
@@ -144,7 +144,7 @@ class AVLTree(object):
 				curr = curr.parent
 			else:
 				curr = _rebalance(curr.parent)
-				break # we break since we now in this case we finish
+				break # we break since we know in this case we finish
 
 
 		# check if root has changed due to rotations. in any rotation on the root it drops maximum by 1
@@ -183,7 +183,53 @@ class AVLTree(object):
 	@pre: node is a real pointer to a node in self
 	"""
 	def delete(self, node):
-		# TODO: implement
+		# Case 1: Node has two children, we swap values with the predecessor (must be leaf) and delete the predecessor
+		if node.left.is_real_node() and node.right.is_real_node():
+			pred = _predecessor(node)
+			node.key, pred.key = pred.key, node.key
+			node.value, pred.value = pred.value, node.value
+			node = pred # node to be deleted
+
+		# logic for deleting a leaf node. for case 1 and 2- if node was originally leaf
+		if not node.left.is_real_node() and not node.right.is_real_node():
+			if node.parent is None: # if node is root and also leaf
+				self.root = None
+				self.size = 0
+				self.max = None
+				return
+			else:
+				if node.parent.left == node:
+					node.parent.left = EXTERNAL_LEAF
+				else:
+					node.parent.right = EXTERNAL_LEAF
+
+		#case 3: node has exactly one child
+		elif node.left.is_real_node() or node.right.is_real_node():
+			child = node.left if node.left.is_real_node() else node.right
+			child.parent = node.parent
+			if node.parent:
+				if node.parent.left == node:
+					node.parent.left = child
+				else:
+					node.parent.right = child
+			else: # we deleted the root
+				self.root = child
+		# now we start rebalancing from parent to root
+		curr = node.parent
+		while curr:
+			_update_height(curr)
+			if abs(_balance_factor(curr)) > 1:
+				curr = _rebalance(curr)
+			curr = curr.parent
+
+		# final updates
+		# check if root has changed due to rotations. in any rotation on the root it drops maximum by 1
+		if self.root.parent is not None:
+			self.root = self.root.parent
+		self.size -= 1
+		# update max if needed
+		if self.max.key == node.key:
+			self.max = _find_max(self.root)
 		return
 
 
@@ -206,6 +252,8 @@ class AVLTree(object):
 			return
 		if self.root is None or not self.root.is_real_node():
 			self.root = tree2.root
+			self.max = tree2.max
+			self.size = tree2.size
 			self.insert(key, val)
 			return
 
@@ -296,6 +344,7 @@ class AVLTree(object):
 		return
 
 	"""splits the dictionary at a given node
+	be aware after this function is called the size property of the dictionary is not valid anymore
 
 	@type node: AVLNode
 	@pre: node is in self
@@ -321,24 +370,26 @@ class AVLTree(object):
 		# Traverse upwards from the given node to update the subtrees structure
 		curr_parent = node.parent
 		curr_child = node
-		while curr_parent is not None:
+		while curr_parent :
 			temp_tree = AVLTree()
 			if curr_child == curr_parent.right:# If the current node is in the right subtree of its parent
-				temp_tree.root = curr_parent.left
-				curr_parent.left.parent = None
+				if curr_parent.left.is_real_node():
+					temp_tree.root = curr_parent.left
+					curr_parent.left.parent = None
 				# Join the parent's left subtree with the smaller subtree
 				smaller_than_node.join(temp_tree, curr_parent.key, curr_parent.value)
 			else: # If the current node is in the left subtree of its parent
-				temp_tree.root = curr_parent.right
-				curr_parent.right.parent = None
+				if curr_parent.right.is_real_node():
+					temp_tree.root = curr_parent.right
+					curr_parent.right.parent = None
 				# Join the parent's right subtree with the larger subtree
 				larger_than_node.join(temp_tree, curr_parent.key, curr_parent.value)
 			# Move up to the parent node for the next iteration
 			curr_child = curr_parent
 			curr_parent = curr_parent.parent
 
-		smaller_than_node.max = smaller_than_node._find_max()
-		larger_than_node.max = larger_than_node._find_max()
+		smaller_than_node.max = _find_max(smaller_than_node.root)
+		larger_than_node.max = _find_max(larger_than_node.root)
 		# Return the two resulting subtrees
 		return smaller_than_node, larger_than_node
 
@@ -391,16 +442,16 @@ class AVLTree(object):
 		_, edges, parent = _search_from(self.root, key)
 		return parent, edges
 
-	# returns the maximum node in the tree iterating in the right extreme of the tree. used in split
-	def _find_max(self):
-		if self.root is None:
-			return None
-		curr = self.root
-		while curr.right.is_real_node():
-			curr = curr.right
-		return curr
 
 
+# returns the maximum node in the tree iterating in the right extreme of the tree. used in split and predecessor
+def _find_max(node):
+	if node is None or not node.is_real_node():
+		return None
+	curr = node
+	while curr.right.is_real_node():
+		curr = curr.right
+	return curr
 # stand-alone helper functions
 # calculates the balance factor of the node
 def _balance_factor(node):
@@ -513,3 +564,19 @@ def _search_from(node, key):
 		edges += 1
 	return None, edges, parent
 
+# returns the predecessor of the node
+def _predecessor(node):
+	if not node or not node.is_real_node():
+		return None
+
+	# Case 1: Node has a left subtree
+	if node.left.is_real_node():
+		return _find_max(node.left)
+
+	# Case 2: No left subtree - go up to the first parent for which node is in the right subtree
+	curr = node
+	parent = curr.parent
+	while parent and parent.left == curr:
+		curr = parent
+		parent = parent.parent
+	return parent
