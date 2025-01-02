@@ -11,8 +11,8 @@ from collections import deque
 
 BULK_MODE = False
 
-NUM_OF_TESTS = 10
-NUM_OF_STEPS = 20
+NUM_OF_TESTS = 100
+NUM_OF_STEPS = 100
 
 MIN_KEY = 0
 MAX_KEY = 10000
@@ -20,9 +20,9 @@ MAX_KEY = 10000
 step_weights = {
     "insert": (8, 30),
     "finger_insert": (8,30),
-    # "delete": (8, 30),
-    # "split": (2, 8),
-    # "join": (3, 8),
+    "delete": (8, 30),
+    "split": (8, 30),
+    "join": (2, 8),
 }
 
 RESULT_FILE_PATH = Path.home() / "avl_tester_results.json"
@@ -121,9 +121,9 @@ class Test:
         return {
             "insert": random.randint(*step_weights["insert"]),
             "finger_insert": random.randint(*step_weights["finger_insert"]),
-            # "delete": random.randint(*step_weights["delete"]),
-            # "split": random.randint(*step_weights["split"]),
-            # "join": random.randint(*step_weights["join"]),
+            "delete": random.randint(*step_weights["delete"]),
+            "split": random.randint(*step_weights["split"]),
+            "join": random.randint(*step_weights["join"]),
         }
 
     def do_tests(self, num_of_steps):
@@ -145,23 +145,23 @@ class Test:
                 raise TestFailedException(steps) from e
 
     def _perform_step(self, step):
-        # if step[0] == "delete":
-        #     self._perform_delete(step)
-        # if step[0] == "split":
-        #     self._perform_split(step)
-        # if step[0] == "join":
-        #     self._perform_join(step)
+        if step[0] == "delete":
+            self._perform_delete(step)
+        if step[0] == "split":
+            self._perform_split(step)
+        if step[0] == "join":
+            self._perform_join(step)
         if step[0] == "insert":
             self._perform_insert(step)
         if step[0] == "finger_insert":
             self._perform_finger_insert(step)
         self._check_state()
 
-    # def _perform_delete(self, step):
-    #     step_type, tree, key = step
-    #     self.key_lists[tree].remove(key)
-    #     node = self.trees[tree].search(key)[0]
-    #     self.trees[tree].delete(node)
+    def _perform_delete(self, step):
+        step_type, tree, key = step
+        self.key_lists[tree].remove(key)
+        node = self.trees[tree].search(key)[0]
+        self.trees[tree].delete(node)
 
     def _perform_insert(self, step):
         step_type, tree, key = step
@@ -173,110 +173,110 @@ class Test:
         bisect.insort(self.key_lists[tree], key)
         self.trees[tree].finger_insert(key, (key, "value"))
 
-    # def _perform_split(self, step):
-    #     step_type, tree, key = step
-    #     key_index = self.key_lists[tree].index(key)
-    #     left_list = self.key_lists[tree][:key_index]
-    #     right_list = self.key_lists[tree][key_index + 1:]
-    #     right_list.sort()
-    #     node = self.trees[tree].search(key)[0]
-    #     left_tree, right_tree = self.trees[tree].split(node)
-    #     self.trees[tree] = left_tree
-    #     self.trees.insert(tree+1, right_tree)
-    #     self.key_lists[tree] = left_list
-    #     self.key_lists.insert(tree+1, right_list)
-    #
-    # def _perform_join(self, step):
-    #     step_type, tree, key, is_right = step
-    #     if is_right:
-    #         llist = self.key_lists.pop(tree)
-    #         ltree = self.trees.pop(tree)
-    #         llist.append(key)
-    #         self.key_lists[tree] = llist + self.key_lists[tree]
-    #         self.key_lists[tree].sort()
-    #         self.trees[tree].join(ltree, key, (key, "value"))
-    #     else:
-    #         rlist = self.key_lists.pop(tree + 1)
-    #         rtree = self.trees.pop(tree + 1)
-    #         self.key_lists[tree].append(key)
-    #         self.key_lists[tree] += rlist
-    #         self.key_lists[tree].sort()
-    #         self.trees[tree].join(rtree, key, (key, "value"))
+    def _perform_split(self, step):
+        step_type, tree, key = step
+        key_index = self.key_lists[tree].index(key)
+        left_list = self.key_lists[tree][:key_index]
+        right_list = self.key_lists[tree][key_index + 1:]
+        right_list.sort()
+        node = self.trees[tree].search(key)[0]
+        left_tree, right_tree = self.trees[tree].split(node)
+        self.trees[tree] = left_tree
+        self.trees.insert(tree+1, right_tree)
+        self.key_lists[tree] = left_list
+        self.key_lists.insert(tree+1, right_list)
+
+    def _perform_join(self, step):
+        step_type, tree, key, is_right = step
+        if is_right:
+            llist = self.key_lists.pop(tree)
+            ltree = self.trees.pop(tree)
+            llist.append(key)
+            self.key_lists[tree] = llist + self.key_lists[tree]
+            self.key_lists[tree].sort()
+            self.trees[tree].join(ltree, key, (key, "value"))
+        else:
+            rlist = self.key_lists.pop(tree + 1)
+            rtree = self.trees.pop(tree + 1)
+            self.key_lists[tree].append(key)
+            self.key_lists[tree] += rlist
+            self.key_lists[tree].sort()
+            self.trees[tree].join(rtree, key, (key, "value"))
 
     def _generate_step(self):
         sizes = [len(lst) for lst in self.key_lists]
         possible_steps = list()
         possible_steps += ["insert"]*self.step_weights["insert"]
-        # if max(sizes) >= 1:
-        #     possible_steps += ["delete"]*self.step_weights["delete"]
+        if max(sizes) >= 1:
+            possible_steps += ["delete"]*self.step_weights["delete"]
         if max(sizes) >= 1:
             possible_steps += ["finger_insert"]*self.step_weights["finger_insert"]
-        # if len(self.key_lists) > 1:
-        #     possible_steps += ["join"]*self.step_weights["join"]
-        # if max(sizes) >= 1:
-        #     possible_steps += ["split"]*self.step_weights["split"]
+        if len(self.key_lists) > 1:
+            possible_steps += ["join"]*self.step_weights["join"]
+        if max(sizes) >= 1:
+            possible_steps += ["split"]*self.step_weights["split"]
 
         step_type = random.choice(possible_steps)
-        # if step_type == "delete":
-        #     return self._generate_delete()
-        # if step_type == "split":
-        #     return self._generate_split()
-        # if step_type == "join":
-        #     return self._generate_join()
+        if step_type == "delete":
+            return self._generate_delete()
+        if step_type == "split":
+            return self._generate_split()
+        if step_type == "join":
+            return self._generate_join()
         if step_type == "finger_insert":
             return self._generate_finger_insert()
         if step_type == "insert":
             return self._generate_insert()
         raise RuntimeError("Can't generate step :(")
 
-    # def _generate_delete(self):
-    #     possible_trees = [index for index, lst in enumerate(self.key_lists) if len(lst) >= 1]
-    #     tree = random.choice(possible_trees)
-    #     key = random.choice(self.key_lists[tree])
-    #     return "delete", tree, key
+    def _generate_delete(self):
+        possible_trees = [index for index, lst in enumerate(self.key_lists) if len(lst) >= 1]
+        tree = random.choice(possible_trees)
+        key = random.choice(self.key_lists[tree])
+        return "delete", tree, key
 
-    # def _generate_split(self):
-    #     possible_trees = [index for index, lst in enumerate(self.key_lists) if len(lst) >= 1]
-    #     tree = random.choice(possible_trees)
-    #     key = random.choice(self.key_lists[tree])
-    #     return "split", tree, key
-    #
-    # def _generate_join(self):
-    #     for i in range(1000):
-    #         left_tree = random.randint(0, len(self.key_lists) - 2)
-    #
-    #         prev_tree_with_keys = left_tree
-    #         diff = 0
-    #         while True:
-    #             if prev_tree_with_keys < 0:
-    #                 min_key = MIN_KEY + diff
-    #                 break
-    #             if len(self.key_lists[prev_tree_with_keys]) > 0:
-    #                 maxleft = self.key_lists[prev_tree_with_keys][-1]
-    #                 min_key = maxleft + diff
-    #                 break
-    #             diff += 1
-    #             prev_tree_with_keys -= 1
-    #
-    #         next_tree_with_keys = left_tree + 1
-    #         diff = 0
-    #         while True:
-    #             if next_tree_with_keys >= len(self.key_lists):
-    #                 max_key = MAX_KEY - diff
-    #                 break
-    #             if len(self.key_lists[next_tree_with_keys]) > 0:
-    #                 minright = self.key_lists[next_tree_with_keys][0]
-    #                 max_key = minright - diff
-    #                 break
-    #             diff += 1
-    #             next_tree_with_keys += 1
-    #
-    #         if min_key+1 > max_key-1:
-    #             continue
-    #         key = random.randint(min_key + 1, max_key - 1)
-    #         is_right = random.randint(0, 1) == 1
-    #         return "join", left_tree, key, is_right
-    #     raise RuntimeError("Can't generate a join step :(")
+    def _generate_split(self):
+        possible_trees = [index for index, lst in enumerate(self.key_lists) if len(lst) >= 1]
+        tree = random.choice(possible_trees)
+        key = random.choice(self.key_lists[tree])
+        return "split", tree, key
+
+    def _generate_join(self):
+        for i in range(1000):
+            left_tree = random.randint(0, len(self.key_lists) - 2)
+
+            prev_tree_with_keys = left_tree
+            diff = 0
+            while True:
+                if prev_tree_with_keys < 0:
+                    min_key = MIN_KEY + diff
+                    break
+                if len(self.key_lists[prev_tree_with_keys]) > 0:
+                    maxleft = self.key_lists[prev_tree_with_keys][-1]
+                    min_key = maxleft + diff
+                    break
+                diff += 1
+                prev_tree_with_keys -= 1
+
+            next_tree_with_keys = left_tree + 1
+            diff = 0
+            while True:
+                if next_tree_with_keys >= len(self.key_lists):
+                    max_key = MAX_KEY - diff
+                    break
+                if len(self.key_lists[next_tree_with_keys]) > 0:
+                    minright = self.key_lists[next_tree_with_keys][0]
+                    max_key = minright - diff
+                    break
+                diff += 1
+                next_tree_with_keys += 1
+
+            if min_key+1 > max_key-1:
+                continue
+            key = random.randint(min_key + 1, max_key - 1)
+            is_right = random.randint(0, 1) == 1
+            return "join", left_tree, key, is_right
+        raise RuntimeError("Can't generate a join step :(")
 
     def _generate_insert(self):
         for i in range(10000):
@@ -510,15 +510,6 @@ def print_tree(root, indent="", pointer="Root: "):
                 print_tree(root.right, indent + "    ", "R--- ")
             else:
                 print(indent + "    R--- None")
-
-tree = AVLTree()
-tree.insert(20, "")
-tree.insert(10, "")
-tree.insert(30, "")
-tree.insert(5, "")
-tree.insert(2, "")
-tree.insert(15, "")
-print_tree(tree)
 
 if __name__ == '__main__':
     run()

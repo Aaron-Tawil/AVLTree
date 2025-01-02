@@ -1,17 +1,1 @@
-Hi
-
-שלום
-
-
-rotate_right(self, node)
-rotate_left(self, node)
-height(self, node)// מחזיר גובה של צומת
-return height_differance : balance_factor(node)// return the the differance in height between the left and right children
-return promotes : rebalance(node) // Checks and fixes the imbalance at each step after insertion or deletion. and returns number of promotes
-
-predecessor(self, node) // return the predecessor of the node
-
-update_height(node)// update the height of the node
-
-insert_position(self, key) \\ return the parent node of the new node (the parent is a leaf)
 

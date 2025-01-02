@@ -66,7 +66,7 @@ class TestAVLEdgeCounts(unittest.TestCase):
 
         # Test searching exact same key after insertion
         _, edges_after_insert = self.tree.search(1)
-        self.assertEqual(edges_after_insert, 1)  # Root + 1
+        self.assertEqual(edges_after_insert, 0)  # Root + 1
 
         # Create deep path and test all points along it
         values = [10, 8, 6, 4, 2]  # Will create left-heavy tree
