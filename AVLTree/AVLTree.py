@@ -132,7 +132,6 @@ class AVLTree(object):
 		# case B: parent is a leaf
 		promotes = 0
 
-		# TODO: check if we can avoid duplicate code, join has same rebalancing logic
 		curr = new_node
 		# case 1 - promote
 		while curr.parent  and curr.height >= curr.parent.height:
