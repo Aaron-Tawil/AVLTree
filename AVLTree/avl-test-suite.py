@@ -45,12 +45,14 @@ class TestAVLEdgeCounts(unittest.TestCase):
             self.tree.insert(k, str(k))
 
         # Test finger search and finger insert consistency
-        test_keys = [65, 75, 85]  # Keys to test
+        test_keys = [65, 75, 85,100]  # Keys to test
         for key in test_keys:
             # First finger search
             _, search_edges = self.tree.finger_search(key)
             # Then finger insert
             _, insert_edges, _ = self.tree.finger_insert(key, str(key))
+            # _, search_edges = self.tree.finger_search(key)
+
             self.assertEqual(search_edges, insert_edges,
                              f"Edge count mismatch in finger operations for key {key}")
 
@@ -66,7 +68,7 @@ class TestAVLEdgeCounts(unittest.TestCase):
 
         # Test searching exact same key after insertion
         _, edges_after_insert = self.tree.search(1)
-        self.assertEqual(edges_after_insert, 0)  # Root + 1
+        self.assertEqual(edges_after_insert, 1)  # Root + 1
 
         # Create deep path and test all points along it
         values = [10, 8, 6, 4, 2]  # Will create left-heavy tree

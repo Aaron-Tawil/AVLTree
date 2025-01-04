@@ -23,8 +23,8 @@ class AVLNode(object):
 		self.right = right
 		self.parent = parent
 		self.height = 0 if key is not None else -1
-		#just for testing TODO: remove
-		self.size = 0
+		#just for testing
+		self._size = 0
 
 
 	"""returns whether self is not a virtual node 
@@ -49,7 +49,7 @@ class AVLTree(object):
 	"""
 	def __init__(self):
 		self.root = None
-		self.size = 0  # Number of real nodes in the tree
+		self._size = 0  # Number of real nodes in the tree
 		self.max = self.root # pointer to maximum node
 
 	"""searches for a node in the dictionary corresponding to the key (starting at the root)
@@ -105,7 +105,7 @@ class AVLTree(object):
 	and h is the number of PROMOTE cases during the AVL rebalancing
 	"""
 	def insert(self, key, val):
-		parent, edges = self._insert_position(key)
+		_ ,edges, parent = _search_from(self.root, key)
 		new_node , promotes = self._insert_to_parent(parent, key, val)
 		return new_node, edges, promotes
 
@@ -113,7 +113,7 @@ class AVLTree(object):
 	def _insert_to_parent(self, parent, key, val):
 		if parent is None:
 			self.root = AVLNode(key, val, parent=None, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
-			self.size += 1
+			self._size += 1
 			self.max = self.root
 			return self.root, 0
 		new_node = AVLNode(key, val, parent=parent, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
@@ -121,7 +121,7 @@ class AVLTree(object):
 			parent.right = new_node
 		else:
 			parent.left = new_node
-		self.size += 1
+		self._size += 1
 		# update max if needed
 		if self.max is not None and key > self.max.key:
 			self.max = new_node
@@ -167,7 +167,7 @@ class AVLTree(object):
 	def finger_insert(self, key, val):
 		if self.max is None:
 			self.root = AVLNode(key, val, parent=None, left=EXTERNAL_LEAF, right=EXTERNAL_LEAF)
-			self.size += 1
+			self._size += 1
 			self.max = self.root
 			return self.root, 0, 0
 		ancestor,edges_up =  self._finger_track_up(key)
@@ -193,7 +193,7 @@ class AVLTree(object):
 		if not node.left.is_real_node() and not node.right.is_real_node():
 			if node.parent is None: # if node is root and also leaf
 				self.root = None
-				self.size = 0
+				self._size = 0
 				self.max = None
 				return
 			else:
@@ -225,7 +225,7 @@ class AVLTree(object):
 		# check if root has changed due to rotations. in any rotation on the root it drops maximum by 1
 		if self.root.parent is not None:
 			self.root = self.root.parent
-		self.size -= 1
+		self._size -= 1
 		# update max if needed
 		if self.max.key == node.key:
 			self.max = _find_max(self.root)
@@ -252,7 +252,7 @@ class AVLTree(object):
 		if self.root is None or not self.root.is_real_node():
 			self.root = tree2.root
 			self.max = tree2.max
-			self.size = tree2.size
+			self._size = tree2._size
 			self.insert(key, val)
 			return
 
@@ -283,7 +283,7 @@ class AVLTree(object):
 		right_tree.root.parent = new_root
 		_update_height(new_root)
 		self.root = new_root
-		self.size += tree2.size + 1
+		self._size += tree2._size + 1
 		self.max = right_tree.max
 		return
 
@@ -339,7 +339,7 @@ class AVLTree(object):
 
 		self.max = smaller_tree.max if is_left_bigger else bigger_tree.max
 		self.root = bigger_tree.root
-		self.size = bigger_tree.size + smaller_tree.size + 1
+		self._size = bigger_tree._size + smaller_tree._size + 1
 		return
 
 	"""splits the dictionary at a given node
@@ -423,7 +423,7 @@ class AVLTree(object):
 	@returns: the number of items in dictionary 
 	"""
 	def size(self):
-		return self.size
+		return self._size
 
 
 	"""returns the root of the tree representing the dictionary
@@ -435,13 +435,9 @@ class AVLTree(object):
 		return self.root
 
 
-	# returns the parent of the node that should be the parent of the new node
-	# and the number of edges on the path from root to the new node
-	def _insert_position(self, key):
-		_, edges, parent = _search_from(self.root, key)
-		return parent, edges
 
 
+# independent helper functions
 
 # returns the maximum node in the tree iterating in the right extreme of the tree. used in split and predecessor
 def _find_max(node):
@@ -553,7 +549,7 @@ def _search_from(node, key):
 	parent = node
 	while curr.is_real_node():
 		if curr.key == key:
-			return curr , edges, curr.parent
+			return curr , edges+1, curr.parent
 		elif curr.key < key:
 			parent = curr
 			curr = curr.right

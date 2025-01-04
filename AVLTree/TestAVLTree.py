@@ -8,14 +8,14 @@ class TestAVLTree(unittest.TestCase):
 
     def test_empty_tree(self):
         self.assertIsNone(self.tree.get_root())
-        self.assertEqual(self.tree.size, 0)
+        self.assertEqual(self.tree._size, 0)
 
     def test_insert_single_node(self):
         node, edges, promotes = self.tree.insert(10, "A")
         self.assertEqual(node.key, 10)
         self.assertEqual(node.value, "A")
         self.assertEqual(self.tree.get_root().key, 10)
-        self.assertEqual(self.tree.size, 1)
+        self.assertEqual(self.tree._size, 1)
         self.assertEqual(edges, 0)
         self.assertEqual(promotes, 0)
 
@@ -24,7 +24,7 @@ class TestAVLTree(unittest.TestCase):
         self.tree.insert(20, "B")
         self.tree.insert(5, "C")
         self.tree.insert(15, "D")
-        self.assertEqual(self.tree.size, 4)
+        self.assertEqual(self.tree._size, 4)
         self.assertEqual(self.tree.get_root().key, 10)
         self.assertEqual(self.tree.max_node().key, 20)
 
@@ -35,7 +35,7 @@ class TestAVLTree(unittest.TestCase):
         self.assertIsNotNone(node)
         self.assertEqual(node.key, 20)
         self.assertEqual(node.value, "B")
-        self.assertEqual(edges, 1)
+        self.assertEqual(edges, 2)
 
     def test_search_non_existing_key(self):
         self.tree.insert(10, "A")
@@ -48,7 +48,7 @@ class TestAVLTree(unittest.TestCase):
         self.tree.insert(20, "B")
         node, _, _ = self.tree.insert(5, "C")
         self.tree.delete(node)
-        self.assertEqual(self.tree.size, 2)
+        self.assertEqual(self.tree._size, 2)
         self.assertIsNone(self.tree.search(5)[0])
 
     def test_delete_internal_node(self):
@@ -56,7 +56,7 @@ class TestAVLTree(unittest.TestCase):
         node, _, _ = self.tree.insert(20, "B")
         self.tree.insert(15, "C")
         self.tree.delete(node)
-        self.assertEqual(self.tree.size, 2)
+        self.assertEqual(self.tree._size, 2)
         self.assertIsNone(self.tree.search(20)[0])
 
     def test_join_trees(self):
@@ -67,7 +67,7 @@ class TestAVLTree(unittest.TestCase):
         tree2.insert(20, "C")
         tree2.insert(25, "D")
         tree1.join(tree2, 15, "E")
-        self.assertEqual(tree1.size, 5)
+        self.assertEqual(tree1._size, 5)
         self.assertEqual(tree1.max_node().key, 25)
         self.assertEqual(tree1.get_root().key, 15)
 

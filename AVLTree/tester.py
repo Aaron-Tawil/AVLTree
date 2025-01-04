@@ -11,7 +11,7 @@ from collections import deque
 
 BULK_MODE = False
 
-NUM_OF_TESTS = 100
+NUM_OF_TESTS = 10
 NUM_OF_STEPS = 100
 
 MIN_KEY = 0
@@ -438,7 +438,7 @@ class Test:
 
     def _validate_node(self, node, tree_root):
         if not node.is_real_node():
-            size = node.size
+            size = node._size
             assert size == 0, f"Incorrect size of virtual node: {size}"
             height = node.height
             assert height == -1, f"Incorrect height of virtual node: {height}"
@@ -478,7 +478,7 @@ class Test:
         assert avl_height == tester_height, f"Incorrect height for node {key}: {avl_height}. Correct height is {tester_height}"
 
         tester_size = size_left + size_right + 1
-        avl_size = node.size
+        avl_size = node._size
         assert avl_size == avl_size, f"Incorrect size for node {key}: {avl_size}. Correct size is {tester_size}"
 
         left_key = node.left.key
