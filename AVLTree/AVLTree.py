@@ -64,6 +64,7 @@ class AVLTree(object):
 		x , e, _ = _search_from(self.root, key)
 		return x, e
 
+
 	"""searches for a node in the dictionary corresponding to the key, starting at the max
         
 	@type key: int
