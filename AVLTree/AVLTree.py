@@ -1,6 +1,6 @@
-#id1:
-#name1:
-#username1:
+#id1:206111668
+#name1:haim toledano
+#username1:haimtoledano
 #id2:345778039
 #name2:Aaron Tawil
 #username2:aarondavidt
@@ -24,7 +24,7 @@ class AVLNode(object):
 		self.parent = parent
 		self.height = 0 if key is not None else -1
 		#just for testing
-		self._size = 0
+		# self._size = 0
 
 
 	"""returns whether self is not a virtual node 
@@ -386,7 +386,6 @@ class AVLTree(object):
 			# Move up to the parent node for the next iteration
 			curr_child = curr_parent
 			curr_parent = curr_parent.parent
-
 		smaller_than_node.max = _find_max(smaller_than_node.root)
 		larger_than_node.max = _find_max(larger_than_node.root)
 		# Return the two resulting subtrees
