@@ -71,6 +71,15 @@ To run the randomized tester:
 ```bash
 python AVLTree/tests/tester.py
 ```
+You can tweak the tester's behavior by editing constants at the top of
+`tests/tester.py`, such as:
+
+* `NUM_OF_TESTS` – number of test runs to execute.
+* `NUM_OF_STEPS` – random operations per run.
+* `MIN_KEY`/`MAX_KEY` – range of keys generated.
+* `step_weights` – relative probability of each operation.
+* `BULK_MODE` – continue running even if a failure occurs.
+
 
 The tester will save the results, including any failures, to a file named `avl_tester_results.json` in your home directory.
 
