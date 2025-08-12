@@ -1,11 +1,3 @@
-#id1:206111668
-#name1:haim toledano
-#username1:haimtoledano
-#id2:345778039
-#name2:Aaron Tawil
-#username2:aarondavidt
-
-
 """A class represnting a node in an AVL tree"""
 
 class AVLNode(object):
