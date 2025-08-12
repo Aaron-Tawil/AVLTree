@@ -4,7 +4,7 @@
 
 This project is a Python implementation of an AVL tree, a self-balancing binary search tree. It is intended for educational purposes to demonstrate the concepts and implementation of an AVL tree.
 
-## Features
+## Main Features
 
 *   **Insert:** Add new nodes to the tree while maintaining the AVL property.
 *   **Delete:** Remove nodes from the tree and rebalance it.
