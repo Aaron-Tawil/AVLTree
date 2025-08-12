@@ -85,7 +85,17 @@ The tester will save the results, including any failures, to a file named `avl_t
 
 ## Dependencies
 
-This project has no external dependencies. It only uses standard Python libraries.
+The core `AVLTree.py` implementation has no external dependencies.
+
+However, some of the other scripts have dependencies:
+* The randomized tester (`AVLTree/tests/tester.py`) uses the `tqdm` library to display progress bars.
+* The experiment script (`AVLTree/experiment1.py`) uses the `pandas` library for data analysis.
+
+You can install these dependencies using pip:
+
+```bash
+pip install tqdm pandas
+```
 
 ## License
 
