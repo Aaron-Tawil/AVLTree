@@ -62,6 +62,18 @@ To run the tests, navigate to the project's root directory and run the following
 python AVLTree/tests/TestAVLTree.py
 ```
 
+### Randomized Tester
+
+The project also includes a randomized tester (`tester.py`) that performs a series of random operations (insert, delete, split, join) on the AVL tree and validates the tree's properties after each step.
+
+To run the randomized tester:
+
+```bash
+python AVLTree/tests/tester.py
+```
+
+The tester will save the results, including any failures, to a file named `avl_tester_results.json` in your home directory.
+
 ## Dependencies
 
 This project has no external dependencies. It only uses standard Python libraries.
